@@ -5,13 +5,17 @@
 autoload -Uz compinit
 compinit -i
 
+# ========================================
+# RUTAS PERSONALIZADAS (QUICK PATHS)
+# ========================================
+
 # Mapa de rutas rápidas
 typeset -A quickpath_map
 quickpath_map[core]="$HOME/core"
 quickpath_map[dev]="$HOME/core/dev"
+quickpath_map[learn]="$HOME/core/learn"
 quickpath_map[uni]="$HOME/core/university"
 quickpath_map[work]="$HOME/core/work"
-quickpath_map[learn]="$HOME/core/learn"
 
 # Función auxiliar para navegación con error amigable
 function _go() {
@@ -34,60 +38,33 @@ function _go() {
     fi
 }
 
-# Functions for quick navigation
-# Usage: core [subpath]
+# Funciones de navegación rápida
 function core() { _go "${quickpath_map[core]}" "$1"; }
 function dev() { _go "${quickpath_map[dev]}" "$1"; }
+function learn() { _go "${quickpath_map[learn]}" "$1"; }
 function uni() { _go "${quickpath_map[uni]}" "$1"; }
 function work() { _go "${quickpath_map[work]}" "$1"; }
-function learn() { _go "${quickpath_map[learn]}" "$1"; }
 
-# ========================================
-# AUTOCOMPLETADO
-# ========================================
-
+# Autocompletado para rutas rápidas
 function _quickpath_complete() {
-    # Get the command name (function being called)
     local cmd="${words[1]}"
-    
-    # Get the corresponding base path from the map
     local base_path="${quickpath_map[$cmd]}"
     
-    # Check if base path exists and is a directory
     if [[ ! -d "$base_path" ]]; then
         return 1
     fi
 
-    # ZSH completion logic
-    # -/ limits completion to directories only (since these are navigation commands)
-    # -W specifies the base directory to complete from, making relative paths work naturally
+    # -/ limits completion to directories only
+    # -W specifies the base directory to complete from
     _path_files -W "$base_path" -/
 }
 
-# Register completion function for all quickpath commands
-compdef _quickpath_complete core dev uni work learn
+# Registrar autocompletado
+compdef _quickpath_complete core dev learn uni work
 
-r() {
-  local tmp
-  tmp="$(mktemp -t ranger_cd.XXXXXX)" || return
-
-  ranger --cmd="map Q chain shell echo %d > $tmp; quit" -- "${@:-.}" 2>/dev/null
-  printf '\r\033[K'
-
-  if [ -f "$tmp" ]; then
-    local dir
-    dir="$(cat -- "$tmp")"
-    [ -n "$dir" ] && [ "$dir" != "$PWD" ] && cd -- "$dir"
-  fi
-
-  rm -f -- "$tmp"
-}
-
-# Abre gestor de archivos en la ruta especificada
-function e() {
-    local path="${1:-.}"
-    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH" thunar "$path" >/dev/null 2>&1 &|
-}
+# ========================================
+# ATAJOS DE APLICACIONES Y UTILIDADES
+# ========================================
 
 # Abre VS Code aquí o en ruta especificada
 function c() {
@@ -103,12 +80,35 @@ function dps() {
     PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH" xfce4-terminal --working-directory="$full_path" >/dev/null 2>&1 &|
 }
 
-function x() {
-    exit
+# Abre gestor de archivos (thunar) en la ruta especificada
+function e() {
+    local path="${1:-.}"
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH" thunar "$path" >/dev/null 2>&1 &|
 }
 
-# Autocompletado para c, e y dps (archivos y directorios)
+# Abre ranger y cambia al directorio al salir
+function r() {
+  local tmp
+  tmp="$(mktemp -t ranger_cd.XXXXXX)" || return
+
+  ranger --cmd="map Q chain shell echo %d > $tmp; quit" -- "${@:-.}" 2>/dev/null
+  printf '\r\033[K'
+
+  if [ -f "$tmp" ]; then
+    local dir
+    dir="$(cat -- "$tmp")"
+    [ -n "$dir" ] && [ "$dir" != "$PWD" ] && cd -- "$dir"
+  fi
+
+  rm -f -- "$tmp"
+}
+
+# ========================================
+# AUTOCOMPLETADO GENÉRICO
+# ========================================
+
+# Autocompletado para comandos que aceptan rutas (c, e, dps, r)
 function _patharg_complete() {
     _files
 }
-compdef _patharg_complete c e dps
+compdef _patharg_complete c dps e r
