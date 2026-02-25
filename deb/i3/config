@@ -123,10 +123,13 @@ bindsym $mod+b split h  # Horizontal
 # Pantalla completa (Fullscreen)
 bindsym $mod+f fullscreen toggle
 
+# Flotante (Floating)
+bindsym $mod+Shift+space floating toggle
+
 # Tipos de Layout
-bindsym $mod+s layout stacking      # Apilado
+bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed        
-bindsym $mod+e layout toggle split  # Alternar split
+bindsym $mod+e layout toggle split
 
 # --- Redimensionar Ventanas ---
 # Modo redimensionar: Mod + Alt + (hjkl / flechas)
@@ -235,7 +238,7 @@ exec --no-startup-id picom                 # Compositor (transparencias/sombras)
 exec --no-startup-id lxpolkit              # Agente de autenticación
 
 # Bloqueo de pantalla automático
-exec --no-startup-id xss-lock -- i3lock -c 111111
+exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 111111
 
 # Fondo de pantalla
 exec --no-startup-id feh --bg-fill ~/core/config/bg.jpg
