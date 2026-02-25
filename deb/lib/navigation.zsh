@@ -82,3 +82,33 @@ r() {
 
   rm -f -- "$tmp"
 }
+
+# Abre gestor de archivos en la ruta especificada
+function e() {
+    local path="${1:-.}"
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH" thunar "$path" >/dev/null 2>&1 &|
+}
+
+# Abre VS Code aquí o en ruta especificada
+function c() {
+    local path="${1:-.}"
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH" code "$path" >/dev/null 2>&1
+}
+
+# Abre una nueva terminal en la ruta especificada
+function dps() {
+    local path="${1:-.}"
+    local full_path
+    full_path="$(cd "$path" 2>/dev/null && pwd || echo "$path")"
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH" xfce4-terminal --working-directory="$full_path" >/dev/null 2>&1 &|
+}
+
+function x() {
+    exit
+}
+
+# Autocompletado para c, e y dps (archivos y directorios)
+function _patharg_complete() {
+    _files
+}
+compdef _patharg_complete c e dps
