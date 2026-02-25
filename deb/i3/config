@@ -1,0 +1,255 @@
+# ==============================================================================
+#  _ _____   ____             __ _
+# (_)___ /  / ___|___  _ __  / _(_) __ _
+# | | |_ \ | |   / _ \| '_ \| |_| |/ _` |
+# | |___) || |__| (_) | | | |  _| | (_| |
+# |_|____/  \____\___/|_| |_|_| |_|\__, |
+#                                  |___/
+# ==============================================================================
+# Archivo de configuración de i3wm
+# Reorganizado por secciones claras para facilitar el mantenimiento.
+
+# ------------------------------------------------------------------------------
+# 1. VARIABLES Y CONFIGURACIÓN BÁSICA
+# ------------------------------------------------------------------------------
+# Tecla maestra (Mod4 = Tecla Windows/Super)
+set $mod Mod4
+
+# Fuente del sistema para ventanas y barra
+font pango:JetBrains Mono 10
+
+# ------------------------------------------------------------------------------
+# 2. APLICACIONES Y LANZADORES
+# ------------------------------------------------------------------------------
+# Terminal (XFCE4 Terminal)
+bindsym $mod+Return exec xfce4-terminal
+
+# Menú de aplicaciones (Rofi)
+bindsym $mod+d exec rofi -show drun -theme ~/.config/rofi/launchers/colorful/style_8.rasi
+
+# Selector de ventanas (Rofi)
+bindsym $mod+Shift+d exec rofi -show window -theme ~/.config/rofi/launchers/colorful/style_8.rasi
+
+# Navegador Web (Brave)
+bindsym $mod+Shift+Return exec brave-browser
+
+# Editor de Código (VS Code)
+bindsym $mod+c exec code
+
+# Calculadora (SpeedCrunch)
+bindsym XF86Calculator exec --no-startup-id speedcrunch
+
+# Historial de Portapapeles (XFCE Clipman)
+bindsym $mod+Shift+v exec --no-startup-id xfce4-clipman-history 
+
+# ------------------------------------------------------------------------------
+# 3. CONTROL DEL SISTEMA Y GESTIÓN DE i3
+# ------------------------------------------------------------------------------
+# Recargar configuración de i3 (sin reiniciar X)
+bindsym $mod+Shift+c reload
+
+# Reiniciar i3 (para actualizaciones de versión, etc.)
+bindsym $mod+Shift+r restart
+
+# Cerrar ventana actual (Kill)
+bindsym $mod+Shift+q kill
+
+# Bloquear pantalla (i3lock)
+bindsym $mod+Shift+x exec i3lock -c 111111
+
+# ------------------------------------------------------------------------------
+# 4. CONTROLES DE HARDWARE (Audio, Brillo, Capturas)
+# ------------------------------------------------------------------------------
+# --- Audio (PulseAudio / Pactl) ---
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym $mod+Ctrl+v exec pavucontrol  # Control de volumen gráfico
+
+# --- Control Multimedia (Playerctl) ---
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+
+# --- Brillo de Pantalla ---
+bindsym XF86MonBrightnessUp exec brightnessctl set +10%
+bindsym XF86MonBrightnessDown exec brightnessctl set 10%-
+
+# --- Capturas de Pantalla (Flameshot) ---
+bindsym Print exec flameshot gui
+bindsym $mod+Shift+s exec flameshot gui
+
+# --- Idioma del Teclado ---
+# Alternar entre US y Latam con Mod+Espacio
+bindsym $mod+Space exec setxkbmap -layout "us,latam" -option "grp:alt_shift_toggle"
+
+# ------------------------------------------------------------------------------
+# 5. NAVEGACIÓN DE VENTANAS (Foco)
+# ------------------------------------------------------------------------------
+# Mover foco con teclas hjkl (estilo Vim)
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+# Mover foco con flechas
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# ------------------------------------------------------------------------------
+# 6. MOVIMIENTO DE VENTANAS
+# ------------------------------------------------------------------------------
+# Mover ventana activa con Shift + hjkl
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+
+# Mover ventana activa con Shift + Flechas
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# ------------------------------------------------------------------------------
+# 7. DISEÑO Y MODIFICACIÓN DEL LAYOUT
+# ------------------------------------------------------------------------------
+# Dividir ventana (Split)
+bindsym $mod+v split v  # Vertical
+bindsym $mod+b split h  # Horizontal
+
+# Pantalla completa (Fullscreen)
+bindsym $mod+f fullscreen toggle
+
+# Tipos de Layout
+bindsym $mod+s layout stacking      # Apilado
+bindsym $mod+w layout tabbed        
+bindsym $mod+e layout toggle split  # Alternar split
+
+# --- Redimensionar Ventanas ---
+# Modo redimensionar: Mod + Alt + (hjkl / flechas)
+bindsym $mod+Mod1+h resize shrink width 2 px or 2 ppt
+bindsym $mod+Mod1+l resize grow   width 2 px or 2 ppt
+bindsym $mod+Mod1+j resize grow   height 2 px or 2 ppt
+bindsym $mod+Mod1+k resize shrink height 2 px or 2 ppt
+
+bindsym $mod+Mod1+Left  resize shrink width 2 px or 2 ppt
+bindsym $mod+Mod1+Right resize grow   width 2 px or 2 ppt
+bindsym $mod+Mod1+Down  resize grow   height 2 px or 2 ppt
+bindsym $mod+Mod1+Up    resize shrink height 2 px or 2 ppt
+
+# ------------------------------------------------------------------------------
+# 8. GESTIÓN DE WORKSPACES (Escritorios Virtuales)
+# ------------------------------------------------------------------------------
+# Definición de nombres de workspaces
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+
+# Cambiar al workspace (Mod + Número)
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
+bindsym $mod+6 workspace $ws6
+
+# Mover ventana al workspace (Mod + Shift + Número)
+bindsym $mod+Shift+1 move container to workspace $ws1
+bindsym $mod+Shift+2 move container to workspace $ws2
+bindsym $mod+Shift+3 move container to workspace $ws3
+bindsym $mod+Shift+4 move container to workspace $ws4
+bindsym $mod+Shift+5 move container to workspace $ws5
+bindsym $mod+Shift+6 move container to workspace $ws6
+
+# Mover el workspace actual completo a otro número (Renombrar)
+bindsym $mod+Ctrl+1 rename workspace to $ws1
+bindsym $mod+Ctrl+2 rename workspace to $ws2
+bindsym $mod+Ctrl+3 rename workspace to $ws3
+bindsym $mod+Ctrl+4 rename workspace to $ws4
+bindsym $mod+Ctrl+5 rename workspace to $ws5
+bindsym $mod+Ctrl+6 rename workspace to $ws6
+
+# Alternar entre workspace actual y el anterior
+bindsym $mod+Tab workspace back_and_forth
+bindsym $mod+Shift+Tab move container to workspace back_and_forth
+
+# ------------------------------------------------------------------------------
+# 9. GESTIÓN MULTI-MONITOR
+# ------------------------------------------------------------------------------
+# Cambiar foco a la siguiente pantalla
+bindsym $mod+o focus output next
+
+# Mover ventana a la siguiente pantalla
+bindsym $mod+Shift+o move container to output next
+
+# Mover workspace completo a la siguiente pantalla
+bindsym $mod+Control+o move workspace to output next
+
+# ------------------------------------------------------------------------------
+# 10. ESTÉTICA Y COLORES
+# ------------------------------------------------------------------------------
+# Colores de las ventanas
+# class                 border  backgr. text    indicator child_border
+client.focused          #2E6F40 #2E6F40 #ffffff #2E6F40   #2E6F40
+client.unfocused        #333333 #222222 #bbbbbb #444444   #222222
+client.focused_inactive #444444 #333333 #dddddd #555555   #333333
+client.urgent           #ff0000 #ff0000 #ffffff #ff0000   #ff0000
+
+# ------------------------------------------------------------------------------
+# 11. BARRA DE ESTADO (i3bar)
+# ------------------------------------------------------------------------------
+bar {
+    status_command i3status
+    tray_output primary
+
+    colors {
+        background #111111
+        statusline #ffffff
+        separator  #444444
+
+        # Colores de los workspaces en la barra
+        #                    border  backgr. text
+        focused_workspace    #2E6F40 #2E6F40 #ffffff
+        active_workspace     #444444 #444444 #ffffff
+        inactive_workspace   #222222 #222222 #bbbbbb
+        urgent_workspace     #ff0000 #ff0000 #ffffff
+        binding_mode         #2E6F40 #2E6F40 #ffffff
+    }
+}
+
+# ------------------------------------------------------------------------------
+# 12. AUTOSTART (Inicio Automático)
+# ------------------------------------------------------------------------------
+# Servicios esenciales del entorno de escritorio
+exec --no-startup-id xfsettingsd           # Configuración XFCE
+exec --no-startup-id xfce4-power-manager   # Gestión de energía
+exec --no-startup-id nm-applet             # Network Manager
+exec --no-startup-id dunst                 # Notificaciones
+exec --no-startup-id picom                 # Compositor (transparencias/sombras)
+exec --no-startup-id lxpolkit              # Agente de autenticación
+
+# Bloqueo de pantalla automático
+exec --no-startup-id xss-lock -- i3lock -c 111111
+
+# Fondo de pantalla
+exec --no-startup-id feh --bg-fill ~/core/config/bg.jpg
+
+# --- Scripts y configuraciones persistentes (exec_always) ---
+# Gestor de portapapeles
+exec_always --no-startup-id xfce4-clipman
+
+# Configuración de monitores (si existe el script)
+exec_always --no-startup-id ~/.screenlayout/dock.sh
+
+# Configuración de periféricos (Scroll natural para Touchpad y Mouse)
+exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
+exec_always --no-startup-id sh -c 'xinput set-prop "PS/2 Generic Mouse" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
+
+# Forzar layout de teclado al inicio
+exec_always --no-startup-id setxkbmap -layout "us,latam" -option "grp:win_space_toggle"

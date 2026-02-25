@@ -1,0 +1,61 @@
+general {
+    colors = true
+    interval = 5
+}
+
+# Orden de izquierda a derecha
+order += "wireless _first_"
+order += "ethernet _first_"
+order += "battery all"
+order += "cpu_usage"
+order += "cpu_temperature 0"
+order += "memory"
+order += "volume master"
+order += "tztime local"
+
+wireless _first_ {
+    format_up = "WiFi %essid %quality %ip"
+    format_down = ""
+}
+
+ethernet _first_ {
+    format_up = "LAN %ip"
+    format_down = ""
+}
+
+battery all {
+    format = "%status%percentage %remaining "
+    integer_battery_capacity = true
+    last_full_capacity = true
+    
+    format_down = ""
+
+    status_chr = "⚡"
+    status_full = "⚡"
+    status_bat = "BAT "
+    status_unk = "BAT "
+}
+
+# CPU y temperatura juntos (visual)
+cpu_usage {
+    format = "  CPU %usage"
+}
+
+cpu_temperature 0 {
+    format = "%degrees°C"
+}
+
+memory {
+    format = "RAM %used  "
+}
+
+volume master {
+    format = " VOL %volume "
+    format_muted = " VOL mute "
+    device = "pulse"
+}
+
+
+tztime local {
+    format = "  %d/%m/%Y %H:%M:%S  "
+}
