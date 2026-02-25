@@ -5,7 +5,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ScriptsDir = Join-Path $ScriptRoot 'scripts'
+$ScriptsDir = Join-Path $ScriptRoot 'win'
 
 # Carga manual en orden lógico
 $scriptOrder = @(
