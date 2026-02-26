@@ -64,7 +64,7 @@ bindsym $mod+Shift+x exec i3lock -c 111111
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
-bindsym $mod+Ctrl+v exec pavucontrol  # Control de volumen gráfico
+bindsym $mod+Ctrl+v exec pavucontrol
 
 # --- Control Multimedia (Playerctl) ---
 bindsym XF86AudioPlay exec playerctl play-pause
@@ -117,8 +117,8 @@ bindsym $mod+Shift+Right move right
 # 7. DISEÑO Y MODIFICACIÓN DEL LAYOUT
 # ------------------------------------------------------------------------------
 # Dividir ventana (Split)
-bindsym $mod+v split v  # Vertical
-bindsym $mod+b split h  # Horizontal
+bindsym $mod+v split v
+bindsym $mod+b split h
 
 # Pantalla completa (Fullscreen)
 bindsym $mod+f fullscreen toggle
@@ -230,12 +230,12 @@ bar {
 # 12. AUTOSTART (Inicio Automático)
 # ------------------------------------------------------------------------------
 # Servicios esenciales del entorno de escritorio
-exec --no-startup-id xfsettingsd           # Configuración XFCE
-exec --no-startup-id xfce4-power-manager   # Gestión de energía
-exec --no-startup-id nm-applet             # Network Manager
-exec --no-startup-id dunst                 # Notificaciones
-exec --no-startup-id picom                 # Compositor (transparencias/sombras)
-exec --no-startup-id lxpolkit              # Agente de autenticación
+exec --no-startup-id xfsettingsd
+exec --no-startup-id xfce4-power-manager
+exec --no-startup-id nm-applet
+exec --no-startup-id dunst
+exec --no-startup-id picom
+exec --no-startup-id lxpolkit
 
 # Bloqueo de pantalla automático
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 111111
