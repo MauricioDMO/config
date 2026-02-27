@@ -5,6 +5,10 @@
 # Get directory of this script
 DEB_CONFIG_DIR="${0:a:h}"
 
+# --- Variables de entorno (.env en la raíz del repo) ---
+ENV_FILE="$DEB_CONFIG_DIR/../.env"
+[[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
+
 # --- ZSH / OMZ Setup (Moved from .zshrc) ---
 
 # Ruta de Oh My Zsh

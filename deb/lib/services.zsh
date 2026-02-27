@@ -32,3 +32,41 @@ function ti() {
 function oc() {
     code .
 }
+
+# Monta la partición de Windows cifrada con BitLocker
+function mount-win() {
+    local device="${BITLOCKER_DEVICE:-/dev/nvme0n1p3}"
+    local mount_point="${BITLOCKER_MOUNT:-/mnt/win}"
+    local mapper_name="winbit"
+
+    if [[ -z "$BITLOCKER_KEY" ]]; then
+        echo "${RED}Error: la variable BITLOCKER_KEY no está definida.${NC}"
+        echo "Crea un archivo .env en la raíz del repo basándote en .env.example"
+        return 1
+    fi
+
+    echo "${CYAN}Abriendo partición BitLocker en $device...${NC}"
+    echo "$BITLOCKER_KEY" | sudo cryptsetup open --type bitlk "$device" "$mapper_name"
+
+    echo "${CYAN}Creando punto de montaje $mount_point...${NC}"
+    sudo mkdir -p "$mount_point"
+
+    echo "${CYAN}Montando en $mount_point (solo lectura)...${NC}"
+    sudo mount -t ntfs-3g -o ro "/dev/mapper/$mapper_name" "$mount_point"
+
+    echo "${GREEN}Partición de Windows montada en $mount_point${NC}"
+}
+
+# Desmonta la partición de Windows
+function umount-win() {
+    local mount_point="${BITLOCKER_MOUNT:-/mnt/win}"
+    local mapper_name="winbit"
+
+    echo "${CYAN}Desmontando $mount_point...${NC}"
+    sudo umount "$mount_point"
+
+    echo "${CYAN}Cerrando mapper $mapper_name...${NC}"
+    sudo cryptsetup close "$mapper_name"
+
+    echo "${GREEN}Partición de Windows desmontada correctamente.${NC}"
+}
