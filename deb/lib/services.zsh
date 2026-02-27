@@ -28,18 +28,7 @@ function ti() {
     echo "${YELLOW}On Linux, install lsd or eza and configure aliases for icons.${NC}"
 }
 
-# Alias for open/xdg-open
-# 'o' alias
-alias o='xdg-open'
-
 # 'oc' ? In win it was `opencode -c`. If that's `code .` or similar.
 function oc() {
     code .
 }
-
-# Aliases moved from .zshrc
-alias cp="rsync -ah --info=progress2"
-alias buds='bluetoothctl connect D0:56:FB:81:EF:4E'
-alias audio='pavucontrol'
-alias wifi='nmcli device wifi'
-alias shutdown='sudo systemctl poweroff'

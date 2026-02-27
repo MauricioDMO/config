@@ -47,6 +47,3 @@ function help_config() {
     done
     echo ""
 }
-
-# Alias standard help to this if desired, but 'help' is a builtin
-alias myhelp='help_config'

@@ -82,6 +82,7 @@ source "$DEB_CONFIG_DIR/lib/services.zsh"
 source "$DEB_CONFIG_DIR/lib/node.zsh"
 source "$DEB_CONFIG_DIR/lib/size.zsh"
 source "$DEB_CONFIG_DIR/lib/help.zsh"
+source "$DEB_CONFIG_DIR/lib/alias.zsh"
 
 
 # Configurar fnm (Fast Node Manager)
