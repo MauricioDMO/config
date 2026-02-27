@@ -245,7 +245,7 @@ exec --no-startup-id feh --bg-fill ~/core/config/bg.jpg
 
 # --- Scripts y configuraciones persistentes (exec_always) ---
 # Gestor de portapapeles
-exec_always --no-startup-id xfce4-clipman
+exec_always --no-startup-id sh -c 'pkill -x xfce4-clipman; sleep 0.3; xfce4-clipman'
 
 # Configuración de monitores (si existe el script)
 exec_always --no-startup-id ~/.screenlayout/dock.sh
