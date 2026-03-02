@@ -2,33 +2,143 @@
 # NODE.JS Y DESARROLLO
 # ========================================
 
-function nclean() {
+nclean() {
     clear
-    echo "${CYAN}Cleaning node_modules and lock files...${NC}"
-
-    local targets=("node_modules" "package-lock.json" "pnpm-lock.yaml" "yarn.lock")
-
-    for target in "${targets[@]}"; do
+    printf "${CYAN}Cleaning node_modules and lock files...${NC}\n"
+    local target
+    for target in node_modules package-lock.json pnpm-lock.yaml yarn.lock; do
         if [[ -e "$target" ]]; then
             rm -rf "$target"
-            echo "  ${GREEN}Removed: $target${NC}"
+            printf "  ${GREEN}Removed: %s${NC}\n" "$target"
         fi
     done
 }
 
-function ncheck() {
+# Parser JSON mínimo con awk (sin python, sin jq)
+# Extrae campos simples de primer nivel de un JSON
+_json_field() {
+    # $1 = field name, reads JSON from stdin
+    awk -v key="\"$1\"" '
+    BEGIN { found=0 }
+    {
+        if (match($0, key "[ \t]*:[ \t]*\"([^\"]*)\"|" key "[ \t]*:[ \t]*([0-9.]+)", arr)) {
+            # Try gawk-style match with groups
+        }
+        # Simpler: just find the key and extract value
+        idx = index($0, key)
+        if (idx > 0) {
+            rest = substr($0, idx + length(key))
+            # skip : and whitespace
+            gsub(/^[ \t]*:[ \t]*/, "", rest)
+            if (substr(rest,1,1) == "\"") {
+                # string value
+                rest = substr(rest, 2)
+                end = index(rest, "\"")
+                if (end > 0) print substr(rest, 1, end-1)
+            } else {
+                # number or other
+                gsub(/[,}\n\r].*/, "", rest)
+                gsub(/[ \t]+$/, "", rest)
+                if (rest != "") print rest
+            }
+        }
+    }' 2>/dev/null
+}
+
+# Extrae scripts de package.json con awk puro (sin python, sin jq)
+_parse_scripts() {
+    [[ ! -f package.json ]] && return 1
+    awk '
+    BEGIN { in_scripts=0; depth=0 }
+    {
+        line = $0
+        if (in_scripts == 0) {
+            if (match(line, /"scripts"[ \t]*:/)) {
+                in_scripts = 1
+                # Find opening brace on this line or next
+                idx = index(line, "{")
+                if (idx > 0) {
+                    depth = 1
+                    line = substr(line, idx+1)
+                } else {
+                    next
+                }
+            } else {
+                next
+            }
+        }
+        if (in_scripts) {
+            n = split(line, chars, "")
+            for (i = 1; i <= n; i++) {
+                if (chars[i] == "{") depth++
+                if (chars[i] == "}") {
+                    depth--
+                    if (depth <= 0) { in_scripts=0; break }
+                }
+            }
+            # Extract "key": "value" pairs from line
+            while (match(line, /"([^"]+)"[ \t]*:[ \t]*"([^"]*)"/, m)) {
+                printf "%s\t%s\n", m[1], m[2]
+                line = substr(line, RSTART + RLENGTH)
+            }
+        }
+    }' package.json 2>/dev/null
+}
+
+# Fallback parser para awk sin arrays en match (mawk)
+_parse_scripts_compat() {
+    [[ ! -f package.json ]] && return 1
+    awk '
+    BEGIN { in_scripts=0; depth=0 }
+    /"scripts"[ \t]*:/ { in_scripts=1 }
+    in_scripts {
+        n = split($0, c, "")
+        for (i=1; i<=n; i++) {
+            if (c[i]=="{") depth++
+            if (c[i]=="}") { depth--; if (depth<=0) { in_scripts=0; exit } }
+        }
+        if (match($0, /\"([^\"]+)\"[ \t]*:[ \t]*\"([^\"]*)\"/)) {
+            s = substr($0, RSTART, RLENGTH)
+            gsub(/^\"/, "", s); gsub(/\"$/, "", s)
+            split(s, parts, "\"[ \t]*:[ \t]*\"")
+            if (parts[1] != "" && parts[2] != "") {
+                printf "%s\t%s\n", parts[1], parts[2]
+            }
+        }
+    }' package.json 2>/dev/null
+}
+
+# Extrae campos del package.json con awk puro
+_pkg_field() {
+    [[ ! -f package.json ]] && return 1
+    local field="$1"
+    awk -v key="\"$field\"" '
+    /"scripts"|"dependencies"|"devDependencies"/ { skip=1 }
+    skip && /{/ { depth++ }
+    skip && /}/ { depth--; if(depth<=0) skip=0; next }
+    skip { next }
+    {
+        idx = index($0, key)
+        if (idx > 0) {
+            rest = substr($0, idx + length(key))
+            gsub(/^[ \t]*:[ \t]*"?/, "", rest)
+            gsub(/"?[ \t]*,?[ \t]*$/, "", rest)
+            if (rest != "") { print rest; exit }
+        }
+    }' package.json 2>/dev/null
+}
+
+ncheck() {
     write_header "Runtime Information"
 
-    local -a names=("Node.js" "npm" "pnpm" "bun")
-    local -a cmds=("node --version" "npm --version" "pnpm --version" "bun --version")
-
-    for i in {1..${#names[@]}}; do
-        local name="${names[$i]}"
-        local cmd="${cmds[$i]}"
-        local bin="${cmd%% *}"
-
-        if command -v "$bin" &> /dev/null; then
-            local version
+    local name cmd bin version
+    for name cmd in \
+        "Node.js" "node --version" \
+        "npm" "npm --version" \
+        "pnpm" "pnpm --version" \
+        "bun" "bun --version"; do
+        bin="${cmd%% *}"
+        if command -v "$bin" >/dev/null 2>&1; then
             version=$(eval "$cmd" 2>/dev/null)
             write_item "$name" "$version" "$GREEN" "$GRAY"
         else
@@ -38,55 +148,34 @@ function ncheck() {
 
     if [[ -f "package.json" ]]; then
         write_header "Current Project"
-
-        local pkg_json
-        pkg_json=$(python3 -c "
-import json
-with open('package.json') as f:
-    d = json.load(f)
-for k in ('name', 'version', 'description'):
-    print(k + '\t' + str(d.get(k, '')))
-" 2>/dev/null)
-
-        while IFS=$'\t' read -r key val; do
-            [[ -n "$val" ]] && write_item "$key" "$val" "$GREEN" "$GRAY"
-        done <<< "$pkg_json"
+        local val
+        for field in name version description; do
+            val=$(_pkg_field "$field")
+            [[ -n "$val" ]] && write_item "$field" "$val" "$GREEN" "$GRAY"
+        done
     fi
-
     echo ""
 }
 
-function _parse_scripts() {
-    if command -v jq &> /dev/null; then
-        jq -r 'if .scripts then .scripts | to_entries[] | "\(.key)\t\(.value)" else empty end' package.json 2>/dev/null
-    elif command -v python3 &> /dev/null; then
-        python3 -c "
-import json
-with open('package.json') as f:
-    d = json.load(f)
-for k, v in d.get('scripts', {}).items():
-    print(k + '\t' + v)
-" 2>/dev/null
-    fi
-}
-
-function nscripts() {
+nscripts() {
     if [[ ! -f "package.json" ]]; then
-        echo -e "\n  ${RED}[!] package.json not found.${NC}"
+        printf "\n  ${RED}[!] package.json not found.${NC}\n"
         return 1
     fi
 
     local scripts_output
+    # Try gawk-compatible parser first, fall back to compat
     scripts_output=$(_parse_scripts)
+    [[ -z "$scripts_output" ]] && scripts_output=$(_parse_scripts_compat)
 
     if [[ -z "$scripts_output" ]]; then
-        echo -e "\n  ${YELLOW}[!] No scripts found in package.json.${NC}"
+        printf "\n  ${YELLOW}[!] No scripts found in package.json.${NC}\n"
         return
     fi
 
     write_header "Available Scripts"
 
-    local max_len=0
+    local max_len=0 key val
     while IFS=$'\t' read -r key _; do
         (( ${#key} > max_len )) && max_len=${#key}
     done <<< "$scripts_output"
@@ -96,6 +185,5 @@ function nscripts() {
         (( ${#val} > 60 )) && val="${val:0:57}..."
         printf "  ${GREEN}%-${max_len}s${NC}  ${GRAY}%s${NC}\n" "$key" "$val"
     done <<< "$scripts_output"
-
     echo ""
 }

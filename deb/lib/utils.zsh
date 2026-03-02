@@ -1,92 +1,72 @@
 # ========================================
-# UTILIDADES GENERALES
+# UTILIDADES GENERALES (optimizado: builtins, sin subshells)
 # ========================================
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-GRAY='\033[0;90m'     # Dark Gray
-WHITE='\033[0;37m'
-NC='\033[0m' # No Color
+# --- Módulos builtin (evita tput/date) ---
+zmodload zsh/terminfo 2>/dev/null || true
+zmodload zsh/datetime  2>/dev/null || true
 
-# Convierte bytes a un formato legible
-function convert_size() {
-    local bytes=$1
-    if (( bytes >= 1099511627776 )); then
-        printf "%.2f TB\n" $((bytes / 1099511627776.0))
-    elif (( bytes >= 1073741824 )); then
-        printf "%.2f GB\n" $((bytes / 1073741824.0))
-    elif (( bytes >= 1048576 )); then
-        printf "%.2f MB\n" $((bytes / 1048576.0))
-    elif (( bytes >= 1024 )); then
-        printf "%.2f KB\n" $((bytes / 1024.0))
-    else
-        echo "${bytes} B"
-    fi
+# --- Colors ($'...' => escapes reales, sin subcadenas \033) ---
+typeset -g RED=$'\e[0;31m' GREEN=$'\e[0;32m' YELLOW=$'\e[0;33m' BLUE=$'\e[0;34m'
+typeset -g CYAN=$'\e[0;36m' GRAY=$'\e[0;90m' WHITE=$'\e[0;37m' NC=$'\e[0m'
+
+# Convierte bytes a un formato legible (pure awk, no python)
+convert_size() {
+    awk "BEGIN {
+        b = $1+0
+        if      (b >= 1099511627776) printf \"%.2f TB\n\", b/1099511627776
+        else if (b >= 1073741824)    printf \"%.2f GB\n\", b/1073741824
+        else if (b >= 1048576)       printf \"%.2f MB\n\", b/1048576
+        else if (b >= 1024)          printf \"%.2f KB\n\", b/1024
+        else                         printf \"%d B\n\", b
+    }"
 }
 
-function get_term_width() {
-    # If tput is not in path, try hardcoded paths or fallback
-    if command -v tput >/dev/null 2>&1; then
-        tput cols
-    elif [[ -x /usr/bin/tput ]]; then
-        /usr/bin/tput cols
-    elif [[ -x /bin/tput ]]; then
-        /bin/tput cols
-    else
-        echo 80
-    fi
+# Ancho terminal (sin tput; usa COLUMNS/terminfo)
+get_term_width() {
+    local w=${COLUMNS:-${terminfo[cols]:-80}}
+    (( w < 20 )) && w=80
+    print -r -- "$w"
 }
 
-# Centra texto en la consola
-function write_centered() {
-    local text="$1"
-    local color="${2:-$WHITE}" # Default white
-    local width=$(get_term_width)
-    local padding=$(( (width - ${#text}) / 2 ))
-    
-    # Handle color variable expansion if passed as name
-    # But shell script is easier if we just pass the code directly
-    
-    if (( padding < 0 )); then padding=0; fi
-    
-    printf "${color}%*s%s${NC}\n" $padding "" "$text"
+# Repite carácter N veces (zsh padding builtin, sin while)
+_repeat_char() {
+    local c="$1" n="$2"
+    print -r -- "${(l:${n}::${c}:)""}"
+}
+
+# Centra texto en la consola (pásale width para no recalcular)
+write_centered() {
+    local text="$1" color="${2:-$WHITE}" width="${3:-$(get_term_width)}"
+    local pad=$(( (width - ${#text}) / 2 ))
+    (( pad < 0 )) && pad=0
+    print -r -- "${color}${(l:${pad}:: :)""}${text}${NC}"
 }
 
 # Escribe un encabezado estilizado
-function write_header() {
+write_header() {
     local title="$1"
     local color="${2:-$GREEN}"
-    local len=${#title}
-    local border_len=$((len + 4))
-    local border=$(printf '═%.0s' {1..$border_len}) # Create border string
-
-    # Using printf for consistency
-    printf "${color}\n  ╔${border}╗${NC}\n"
-    printf "${color}  ║  ${title}  ║${NC}\n"
-    printf "${color}  ╚${border}╝${NC}\n"
+    local border_len=$(( ${#title} + 4 ))
+    local border=$(_repeat_char '═' $border_len)
+    print -r -- "${color}"
+    print -r -- "  ╔${border}╗"
+    print -r -- "  ║  ${title}  ║"
+    print -r -- "  ╚${border}╝${NC}"
 }
 
-# Escribe una línea de item (Comando » Descripción)
-function write_item() {
-    local label="$1"
-    local value="$2"
-    local label_color="${3:-$GREEN}"
-    local value_color="${4:-$WHITE}"
-    
-    # Simple formatting: Label (colored) : Value (colored)
-    # The PS script aligns them. Let's try basic alignment.
+# Escribe una línea de item (Comando : Descripción)
+write_item() {
+    local label="$1" value="$2"
+    local label_color="${3:-$GREEN}" value_color="${4:-$WHITE}"
     printf "  ${label_color}%-12s${NC} : ${value_color}%s${NC}\n" "$label" "$value"
 }
 
 # Escribe una línea divisoria
-function write_divider() {
+write_divider() {
     local color="${1:-$GRAY}"
     local width=$(get_term_width)
-    if (( width < 20 )); then width=60; fi
-    local line=$(printf '─%.0s' {1..$((width - 4))})
-    printf "  ${color}${line}${NC}\n"
+    (( width < 20 )) && width=60
+    local line=$(_repeat_char '─' $((width - 4)))
+    print -r -- "  ${color}${line}${NC}"
 }

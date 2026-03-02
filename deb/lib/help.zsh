@@ -2,48 +2,39 @@
 # AYUDA
 # ========================================
 
-function help_config() {
+help_config() {
     write_header "AYUDA / CONFIGURACIÓN ZSH"
 
-    # Define commands similarly to PS1 structure
-    # Format: Category|Command|Description
-    local commands=(
-        "Navigation|core|Ir a ~/core"
-        "Navigation|dev|Ir a ~/core/dev"
-        "Navigation|uni|Ir a ~/core/university"
-        "Navigation|work|Ir a ~/core/work"
-        "Navigation|learn|Ir a ~/core/learn"
-        "Navigation|o|Abrir archivo (xdg-open)"
-        "Navigation|oc|Abrir VS Code aquí (code .)"
-        
-        "Package Management|nclean|Limpiar node_modules y locks"
-        "Package Management|ncheck|Ver versiones de Node/npm/etc"
-        "Package Management|nscripts|Listar scripts de npm disponibles"
-
-        "System|size|Ver tamaño de directorio/archivo detallado"
-        "System|essh|Habilitar/Iniciar SSH Agent"
-        "System|sexo|???"
-        "System|ti|Terminal Icons info"
-    )
-
-    # Get unique categories
-    local categories=($(printf "%s\n" "${commands[@]}" | cut -d'|' -f1 | sort -u))
-
-    for cat in "${categories[@]}"; do
+    # Imprime sección de ayuda: usa parameter expansion en lugar de cut (sin subshells)
+    _help_section() {
+        local cat_name="$1"; shift
         echo ""
-        echo "  ${CYAN}${cat}${NC}"
-        # Print divider for category
-        local line=$(printf '─%.0s' {1..${#cat}})
-        echo "  ${GRAY}${line}${NC}"
-
-        for entry in "${commands[@]}"; do
-            local entry_cat=$(echo "$entry" | cut -d'|' -f1)
-            if [[ "$entry_cat" == "$cat" ]]; then
-                local cmd=$(echo "$entry" | cut -d'|' -f2)
-                local desc=$(echo "$entry" | cut -d'|' -f3)
-                write_item "$cmd" "$desc"
-            fi
+        printf "  ${CYAN}%s${NC}\n" "$cat_name"
+        printf "  ${GRAY}%s${NC}\n" "$(_repeat_char '─' ${#cat_name})"
+        local entry
+        for entry in "$@"; do
+            write_item "${entry%%|*}" "${entry#*|}"
         done
-    done
+    }
+
+    _help_section "Navigation" \
+        "core|Ir a ~/core" \
+        "dev|Ir a ~/core/dev" \
+        "uni|Ir a ~/core/university" \
+        "work|Ir a ~/core/work" \
+        "learn|Ir a ~/core/learn" \
+        "oc|Abrir VS Code aquí (code .)"
+
+    _help_section "Package Management" \
+        "nclean|Limpiar node_modules y locks" \
+        "ncheck|Ver versiones de Node/npm/etc" \
+        "nscripts|Listar scripts de npm disponibles"
+
+    _help_section "System" \
+        "size|Ver tamaño de directorio/archivo detallado" \
+        "essh|Habilitar/Iniciar SSH Agent" \
+        "mount-win|Montar partición Windows (BitLocker)" \
+        "umount-win|Desmontar partición Windows"
+
     echo ""
 }

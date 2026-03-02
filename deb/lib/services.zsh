@@ -3,70 +3,58 @@
 # ========================================
 
 # Abre CornHub
-function sexo() {
-    # Linux equivalent for open
-    xdg-open https://cornhub.website/ > /dev/null 2>&1 &
-}
+sexo() { xdg-open https://cornhub.website/ >/dev/null 2>&1 & }
 
 # SSH Agent
-function essh() {
-    if ! pgrep -u "$USER" ssh-agent > /dev/null; then
-        echo "${YELLOW}Starting SSH Agent...${NC}"
+essh() {
+    if ! pgrep -u "$USER" ssh-agent >/dev/null; then
+        printf "${YELLOW}Starting SSH Agent...${NC}\n"
         eval "$(ssh-agent -s)"
     else
-        echo "${GREEN}SSH Agent is already running.${NC}"
-        # Optionally re-export variables if saved somewhere, but for now just status
+        printf "${GREEN}SSH Agent is already running.${NC}\n"
         if [[ -z "$SSH_AUTH_SOCK" ]]; then
-             echo "${RED}Warning: SSH_AUTH_SOCK is not set in current shell.${NC}"
-             echo "Run 'eval \$(ssh-agent -s)' to attach to a new agent."
+            printf "${RED}Warning: SSH_AUTH_SOCK is not set in current shell.${NC}\n"
+            echo "Run 'eval \$(ssh-agent -s)' to attach to a new agent."
         fi
     fi
 }
 
-# Terminal Icons (lsd or eza are usually used in Linux for icons)
-function ti() {
-    echo "${YELLOW}On Linux, install lsd or eza and configure aliases for icons.${NC}"
-}
-
-# 'oc' ? In win it was `opencode -c`. If that's `code .` or similar.
-function oc() {
-    code .
-}
+# Abre VS Code aquí
+oc() { code .; }
 
 # Monta la partición de Windows cifrada con BitLocker
-function mount-win() {
+mount-win() {
     local device="${BITLOCKER_DEVICE:-/dev/nvme0n1p3}"
     local mount_point="${BITLOCKER_MOUNT:-/mnt/win}"
     local mapper_name="winbit"
 
     if [[ -z "$BITLOCKER_KEY" ]]; then
-        echo "${RED}Error: la variable BITLOCKER_KEY no está definida.${NC}"
+        printf "${RED}Error: la variable BITLOCKER_KEY no está definida.${NC}\n"
         echo "Crea un archivo .env en la raíz del repo basándote en .env.example"
         return 1
     fi
 
-    echo "${CYAN}Abriendo partición BitLocker en $device...${NC}"
+    printf "${CYAN}Abriendo partición BitLocker en %s...${NC}\n" "$device"
     echo "$BITLOCKER_KEY" | sudo cryptsetup open --type bitlk "$device" "$mapper_name"
 
-    echo "${CYAN}Creando punto de montaje $mount_point...${NC}"
     sudo mkdir -p "$mount_point"
 
-    echo "${CYAN}Montando en $mount_point (solo lectura)...${NC}"
+    printf "${CYAN}Montando en %s (solo lectura)...${NC}\n" "$mount_point"
     sudo mount -t ntfs-3g -o ro "/dev/mapper/$mapper_name" "$mount_point"
 
-    echo "${GREEN}Partición de Windows montada en $mount_point${NC}"
+    printf "${GREEN}Partición de Windows montada en %s${NC}\n" "$mount_point"
 }
 
 # Desmonta la partición de Windows
-function umount-win() {
+umount-win() {
     local mount_point="${BITLOCKER_MOUNT:-/mnt/win}"
     local mapper_name="winbit"
 
-    echo "${CYAN}Desmontando $mount_point...${NC}"
+    printf "${CYAN}Desmontando %s...${NC}\n" "$mount_point"
     sudo umount "$mount_point"
 
-    echo "${CYAN}Cerrando mapper $mapper_name...${NC}"
+    printf "${CYAN}Cerrando mapper %s...${NC}\n" "$mapper_name"
     sudo cryptsetup close "$mapper_name"
 
-    echo "${GREEN}Partición de Windows desmontada correctamente.${NC}"
+    printf "${GREEN}Partición de Windows desmontada correctamente.${NC}\n"
 }
