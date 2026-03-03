@@ -1,0 +1,10 @@
+# === Base (mapea tus variables de rofi) ===
+background = #1E1E1E
+foreground = #FFFFFF
+
+# Cursor / selección (accent como en tu prompt/selección de rofi)
+cursor-color = #2E6F40
+cursor-text = #1E1E1E
+
+selection-background = #2B2B2B
+selection-foreground = #FFFFFF

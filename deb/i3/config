@@ -21,8 +21,8 @@ font pango:JetBrains Mono 10
 # ------------------------------------------------------------------------------
 # 2. APLICACIONES Y LANZADORES
 # ------------------------------------------------------------------------------
-# Terminal (XFCE4 Terminal)
-bindsym $mod+Return exec xfce4-terminal
+# Terminal (Ghostty)
+bindsym $mod+Return exec ghostty
 
 # Menú de aplicaciones (Rofi)
 bindsym $mod+d exec rofi -show drun -theme ~/.config/config/deb/rofi/theme.rasi
@@ -197,6 +197,20 @@ bindsym $mod+Control+o move workspace to output next
 # ------------------------------------------------------------------------------
 # 10. ESTÉTICA Y COLORES
 # ------------------------------------------------------------------------------
+# Forzar bordes para que se vea el foco
+
+# Ghostty
+for_window [class="ghostty"] border pixel 2
+# VS Code
+for_window [class="code"] border pixel 2
+
+# Quitar barra de título en modo split, pero mantenerla en tabbed/stacking
+# Nota: i3 no permite ocultar títulos basado puramente en el layout dinámico de forma nativa simple,
+# pero "border pixel" oculta el título. Para mantener títulos en stack/tabbed:
+default_border pixel 2
+default_floating_border normal
+hide_edge_borders smart
+
 # Colores de las ventanas
 # class                 border  backgr. text    indicator child_border
 client.focused          #2E6F40 #2E6F40 #ffffff #2E6F40   #2E6F40

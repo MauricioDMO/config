@@ -1,0 +1,20 @@
+# Fuente como tu rofi
+font-family = "Iosevka Nerd Font"
+font-size = 10
+
+# Usar el theme que acabas de crear (por nombre de archivo)
+theme = rofi-adi1090x
+
+# “transparency: real” estilo rofi (ajusta a gusto)
+background-opacity = 0.92
+background-blur = 20
+
+# Look más “plano” (sin bordes/decoración)
+window-decoration = none
+
+# Un poco de aire (rofi tiene padding generoso)
+window-padding-x = 10
+window-padding-y = 10
+
+# Opcional: que el chrome de la ventana use tus colores (Linux)
+window-theme = ghostty
