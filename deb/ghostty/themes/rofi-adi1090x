@@ -6,5 +6,5 @@ foreground = #FFFFFF
 cursor-color = #2E6F40
 cursor-text = #1E1E1E
 
-selection-background = #2B2B2B
-selection-foreground = #FFFFFF
+selection-background = #2E6F40
+selection-foreground = #1E1E1E
