@@ -25,10 +25,10 @@ font pango:JetBrains Mono 10
 bindsym $mod+Return exec xfce4-terminal
 
 # Menú de aplicaciones (Rofi)
-bindsym $mod+d exec rofi -show drun -theme ~/.config/rofi/launchers/colorful/style_8.rasi
+bindsym $mod+d exec rofi -show drun -theme ~/.config/config/deb/rofi/theme.rasi
 
 # Selector de ventanas (Rofi)
-bindsym $mod+Shift+d exec rofi -show window -theme ~/.config/rofi/launchers/colorful/style_8.rasi
+bindsym $mod+Shift+d exec rofi -show window -theme ~/.config/config/deb/rofi/theme.rasi
 
 # Navegador Web (Brave)
 bindsym $mod+Shift+Return exec brave-browser
