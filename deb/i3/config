@@ -61,8 +61,8 @@ bindsym $mod+Shift+x exec i3lock -c 111111
 # 4. CONTROLES DE HARDWARE (Audio, Brillo, Capturas)
 # ------------------------------------------------------------------------------
 # --- Audio (PulseAudio / Pactl) ---
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +2%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -2%
 bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
 bindsym $mod+Ctrl+v exec pavucontrol
 
@@ -72,8 +72,8 @@ bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
 # --- Brillo de Pantalla ---
-bindsym XF86MonBrightnessUp exec brightnessctl set +10%
-bindsym XF86MonBrightnessDown exec brightnessctl set 10%-
+bindsym XF86MonBrightnessUp exec brightnessctl set +5%
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
 
 # --- Capturas de Pantalla (Flameshot) ---
 bindsym Print exec flameshot gui
