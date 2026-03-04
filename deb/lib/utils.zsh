@@ -12,7 +12,7 @@ typeset -g CYAN=$'\e[0;36m' GRAY=$'\e[0;90m' WHITE=$'\e[0;37m' NC=$'\e[0m'
 
 # Convierte bytes a un formato legible (pure awk, no python)
 convert_size() {
-    awk "BEGIN {
+    /usr/bin/awk "BEGIN {
         b = $1+0
         if      (b >= 1099511627776) printf \"%.2f TB\n\", b/1099511627776
         else if (b >= 1073741824)    printf \"%.2f GB\n\", b/1073741824
@@ -29,10 +29,12 @@ get_term_width() {
     print -r -- "$w"
 }
 
-# Repite carácter N veces (zsh padding builtin, sin while)
+# Repite carácter N veces (zsh repeat builtin)
 _repeat_char() {
-    local c="$1" n="$2"
-    print -r -- "${(l:${n}::${c}:)""}"
+    local c="${1:- }" n="${2:-0}"
+    local result=""
+    (( n > 0 )) && repeat $n result+="$c"
+    printf '%s' "$result"
 }
 
 # Centra texto en la consola (pásale width para no recalcular)
