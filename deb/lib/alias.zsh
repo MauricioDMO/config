@@ -21,4 +21,8 @@ alias myhelp='help_config'
 alias ls='lsd --icon=auto --group-dirs first'
 alias ll='lsd -l --icon=auto --group-dirs first'
 alias la='lsd -la --icon=auto --group-dirs first'
-alias lt='lsd --tree --depth=2 --icon=auto --group-dirs first'
+
+lt() {
+    local depth=${1:-2}
+    lsd --tree --depth "$depth" --icon=auto --group-dirs first
+}
