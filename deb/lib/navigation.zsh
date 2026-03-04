@@ -57,11 +57,11 @@ c() { code "${1:-.}" >/dev/null 2>&1; }
 dps() {
     local full_path
     full_path="$(cd "${1:-.}" 2>/dev/null && pwd)" || full_path="${1:-.}"
-    xfce4-terminal --working-directory="$full_path" >/dev/null 2>&1 &!
+    ghostty "$full_path" >/dev/null 2>&1 &!
 }
 
 # Abre gestor de archivos (thunar) en la ruta especificada
-e() { thunar "${1:-.}" >/dev/null 2>&1 &! }
+e() { thunar "${1:-.}" >/dev/null 2>&1; }
 
 # Abre ranger y cambia al directorio al salir
 r() {
