@@ -33,3 +33,6 @@ keybind = ctrl+delete=esc:d
 
 keybind = ctrl+left=esc:b
 keybind = ctrl+right=esc:f
+
+# Velocidad de scroll (default=1.0, aumentar para más rápido)
+mouse-scroll-multiplier = 5
