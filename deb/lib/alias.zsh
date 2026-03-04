@@ -26,3 +26,8 @@ lt() {
     local depth=${1:-2}
     lsd --tree --depth "$depth" --icon=auto --group-dirs first
 }
+
+lta() {
+    local depth=${1:-2}
+    lsd -la --tree --depth "$depth" --icon=auto --group-dirs first
+}
