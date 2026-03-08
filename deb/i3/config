@@ -254,15 +254,15 @@ exec --no-startup-id lxpolkit
 # Bloqueo de pantalla automático
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 111111
 
-# Fondo de pantalla
-exec --no-startup-id feh --bg-fill ~/core/config/bg.jpg
-
 # --- Scripts y configuraciones persistentes (exec_always) ---
 # Gestor de portapapeles (delay para esperar que X/DBus estén listos)
 exec --no-startup-id sh -c 'sleep 2 && xfce4-clipman'
 
 # Configuración de monitores (si existe el script)
 exec_always --no-startup-id ~/.screenlayout/dock.sh
+
+# Fondo de pantalla (después de dock.sh para que el layout de monitores ya esté aplicado)
+exec_always --no-startup-id sh -c 'feh --bg-fill ~/core/config/bg.jpg'
 
 # Configuración de periféricos (Scroll natural para Touchpad y Mouse)
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
