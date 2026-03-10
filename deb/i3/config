@@ -40,7 +40,8 @@ bindsym $mod+c exec code
 bindsym XF86Calculator exec --no-startup-id speedcrunch
 
 # Historial de Portapapeles (XFCE Clipman)
-bindsym $mod+Shift+v exec --no-startup-id xfce4-clipman-history 
+bindsym $mod+Shift+v exec --no-startup-id copyq menu
+bindsym $mod+Ctrl+Shift+v exec --no-startup-id copyq toggle
 
 # ------------------------------------------------------------------------------
 # 3. CONTROL DEL SISTEMA Y GESTIÓN DE i3
@@ -255,8 +256,8 @@ exec --no-startup-id lxpolkit
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 111111
 
 # --- Scripts y configuraciones persistentes (exec_always) ---
-# Gestor de portapapeles (delay para esperar que X/DBus estén listos)
-exec --no-startup-id sh -c 'sleep 2 && xfce4-clipman'
+# Iniciar CopyQ al arrancar
+exec_always --no-startup-id sh -c 'sleep 3 && pgrep -x copyq >/dev/null || copyq'
 
 # Configuración de monitores (si existe el script)
 exec_always --no-startup-id ~/.screenlayout/dock.sh
