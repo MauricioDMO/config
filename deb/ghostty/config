@@ -19,6 +19,9 @@ window-padding-y = 10
 # Opcional: que el chrome de la ventana use tus colores (Linux)
 window-theme = ghostty
 
+# Keybindings personalizados (ejemplo: Ctrl+Shift+F para buscar)
+keybind = ctrl+shift+f=start_search
+
 # Ctrl+C: copia SOLO si hay selección; si no hay selección, se comporta normal (SIGINT)
 keybind = performable:ctrl+c=copy_to_clipboard
 
