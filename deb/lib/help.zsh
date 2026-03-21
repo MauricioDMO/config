@@ -36,5 +36,9 @@ help_config() {
         "mount-win|Montar partición Windows (BitLocker)" \
         "umount-win|Desmontar partición Windows"
 
+    _help_section "Graphic Tablet" \
+        "tablet_setup [OUTPUT]|Aplica setup completo de tableta (acepta salida o desktop)" \
+        "tablet_focus [OUTPUT]|Selecciona mapeo por numero (0=desktop, 1..N=pantalla)"
+
     echo ""
 }
