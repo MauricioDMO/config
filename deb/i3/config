@@ -263,7 +263,7 @@ exec_always --no-startup-id sh -c 'sleep 3 && pgrep -x copyq >/dev/null || copyq
 exec_always --no-startup-id ~/.screenlayout/dock.sh
 
 # Fondo de pantalla aleatorio (si hay imágenes en ~/core/config/bg/)
-exec_always --no-startup-id sh -c 'img=$(find ~/core/config/bg -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
+exec_always --no-startup-id sh -c 'sleep 1 && img=$(find ~/core/config/bg -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
 
 # Configuración de periféricos (Scroll natural para Touchpad y Mouse)
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
