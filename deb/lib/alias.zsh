@@ -31,3 +31,25 @@ lta() {
     local depth=${1:-2}
     lsd -la --tree --depth "$depth" --icon=auto --group-dirs first
 }
+
+apt-uninstall() {
+    local app=$1
+    if [[ -z "$app" ]]; then
+        echo "Uso: apt-uninstall <nombre-del-paquete>"
+        return 1
+    fi
+
+    echo "Desinstalando $app"
+    sudo apt purge -y "$app"
+    sudo apt autoremove -y
+
+    echo "Paquete $app desinstalado y dependencias no necesarias eliminadas."
+}
+
+_apt_uninstall_completion() {
+    local -a installed_pkgs
+    installed_pkgs=("${(@f)$(dpkg-query -W -f='${binary:Package}\n' 2>/dev/null)}")
+    _describe 'paquete instalado' installed_pkgs
+}
+
+compdef _apt_uninstall_completion apt-uninstall
