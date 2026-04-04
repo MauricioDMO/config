@@ -1,6 +1,9 @@
 # Fuente como tu rofi
-font-family = "Iosevka Nerd Font"
+# font-family = "Iosevka Nerd Font"
+font-family = "Cascadia Code"
+font-feature = calt, liga, dlig, clig, ss01, ss02, ss03, ss04, ss05, ss06, ss07, ss08, ss09, ss10, ss11, ss12, ss13, ss14, ss15, ss16, ss17, ss18, ss19, ss20
 font-size = 10
+term = xterm-256color
 
 # Usar el theme que acabas de crear (por nombre de archivo)
 theme = rofi-adi1090x
