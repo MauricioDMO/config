@@ -223,7 +223,7 @@ client.urgent           #ff0000 #ff0000 #ffffff #ff0000   #ff0000
 # 11. BARRA DE ESTADO (i3bar)
 # ------------------------------------------------------------------------------
 bar {
-    status_command i3status
+    status_command i3blocks -c ~/.config/i3blocks/config
     tray_output primary
 
     colors {
