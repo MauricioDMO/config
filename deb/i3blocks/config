@@ -28,7 +28,8 @@ interval=5
 
 [volume]
 command=~/.config/i3blocks/scripts/volume.sh
-interval=1
+interval=once
+signal=1
 
 [time]
 command=~/.config/i3blocks/scripts/datetime.sh

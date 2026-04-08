@@ -62,9 +62,9 @@ bindsym $mod+Shift+x exec i3lock -c 111111
 # 4. CONTROLES DE HARDWARE (Audio, Brillo, Capturas)
 # ------------------------------------------------------------------------------
 # --- Audio (PulseAudio / Pactl) ---
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +2%
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -2%
-bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioRaiseVolume exec --no-startup-id sh -c 'pactl set-sink-mute @DEFAULT_SINK@ 0 && pactl set-sink-volume @DEFAULT_SINK@ +2% && pkill -RTMIN+1 i3blocks'
+bindsym XF86AudioLowerVolume exec --no-startup-id sh -c 'pactl set-sink-mute @DEFAULT_SINK@ 0 && pactl set-sink-volume @DEFAULT_SINK@ -2% && pkill -RTMIN+1 i3blocks'
+bindsym XF86AudioMute exec --no-startup-id sh -c 'pactl set-sink-mute @DEFAULT_SINK@ toggle && pkill -RTMIN+1 i3blocks'
 bindsym $mod+Ctrl+v exec pavucontrol
 
 # --- Control Multimedia (Playerctl) ---
