@@ -25,4 +25,8 @@ case "$status_code" in
     *) status="" ;;
 esac
 
+if [ "$level" = "100" ]; then
+    status=""
+fi
+
 echo "📱 ${level}% ${status}"

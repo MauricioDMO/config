@@ -10,11 +10,15 @@ done
 capacity=$(cat "$bat/capacity" 2>/dev/null)
 status=$(cat "$bat/status" 2>/dev/null)
 
-case "$status" in
-    Charging) prefix="⚡" ;;
-    Full) prefix="⚡" ;;
-    *) prefix="BAT " ;;
-esac
+if [ "$capacity" = "100" ]; then
+    prefix="BAT "
+else
+    case "$status" in
+        Charging) prefix="⚡" ;;
+        Full) prefix="BAT " ;;
+        *) prefix="BAT " ;;
+    esac
+fi
 
 time_str=""
 if command -v upower >/dev/null 2>&1; then
