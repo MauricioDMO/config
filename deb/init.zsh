@@ -117,6 +117,7 @@ source "$DEB_CONFIG_DIR/lib/size.zsh"
 source "$DEB_CONFIG_DIR/lib/help.zsh"
 source "$DEB_CONFIG_DIR/lib/alias.zsh"
 source "$DEB_CONFIG_DIR/lib/graphic-tablet.zsh"
+source "$DEB_CONFIG_DIR/lib/wine.zsh"
 
 # ========================================
 # Node / Bun / Extras

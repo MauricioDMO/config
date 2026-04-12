@@ -40,5 +40,9 @@ help_config() {
         "tablet_setup [OUTPUT]|Aplica setup completo de tableta (acepta salida o desktop)" \
         "tablet_focus [OUTPUT]|Selecciona mapeo por numero (0=desktop, 1..N=pantalla)"
 
+    _help_section "Wine" \
+        "createwine [--init-only]|Asistente para crear perfil o solo init.sh" \
+        "cwine|Alias corto de createwine"
+
     echo ""
 }
