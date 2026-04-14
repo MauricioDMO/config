@@ -3,14 +3,17 @@
 # ========================================
 
 show_name() {
-    local line1='░█▄█░█▀█░█░█░█▀▄░▀█▀░█▀▀░▀█▀░█▀█░█▀▄░█▄█░█▀█'
-    local line2='░█░█░█▀█░█░█░█▀▄░░█░░█░░░░█░░█░█░█░█░█░█░█░█'
-    local line3='░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀░░▀░▀░▀▀▀'
-
     echo ""
-    write_centered "$line1" "$GREEN"
-    write_centered "$line2" "$GREEN"
-    write_centered "$line3" "$GREEN"
+    local font_dir="$HOME/.config/config/deb/fonts/figlet"
+    local -a fonts
+    fonts=("$font_dir"/*.flf(N))
+
+    local selected_font="$font_dir/roman.flf"
+    if (( ${#fonts[@]} > 0 )); then
+        selected_font="${fonts[RANDOM % ${#fonts[@]} + 1]}"
+    fi
+
+    figlet -t -c -f "$selected_font" "MauricioDMO" | lolcat -f
 
     local current_date
     current_date=$(date "+%A, %d %B %Y %H:%M")
