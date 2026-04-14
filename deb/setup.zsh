@@ -14,5 +14,10 @@ ln -sfn ~/.config/config/deb/xfce4/xfce4-power-manager.xml ~/.config/xfce4/xfcon
 # Enlazar configuraciones de terminal a la carpeta de configuración del usuario
 ln -sfn ~/.config/config/deb/terminal/.p10k.zsh ~/.p10k.zsh
 
+# Enlazar configuraciones de Ghostty a la carpeta de configuración del usuario
+mkdir -p ~/.config/ghostty
+ln -sfn ~/.config/config/deb/ghostty/config ~/.config/ghostty/config
+ln -sfn ~/.config/config/deb/ghostty/themes ~/.config/ghostty/themes
+
 # Enlazar configuraciones de X11 a la carpeta de configuración del sistema
 ln -sfn ~/.config/config/deb/X11/70-synaptics.conf /etc/X11/xorg.conf.d/70-synaptics.conf
