@@ -31,7 +31,7 @@ bindsym $mod+d exec rofi -show drun -theme ~/.config/config/deb/rofi/theme.rasi
 bindsym $mod+Shift+d exec rofi -show window -theme ~/.config/config/deb/rofi/theme.rasi
 
 # Navegador Web (Brave)
-bindsym $mod+Shift+Return exec brave-browser
+bindsym $mod+Shift+Return exec brave-origin-beta
 
 # Editor de Código (VS Code)
 bindsym $mod+c exec code
