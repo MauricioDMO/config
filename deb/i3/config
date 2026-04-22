@@ -36,6 +36,9 @@ bindsym $mod+Shift+Return exec brave-origin-beta
 # Editor de Código (VS Code)
 bindsym $mod+c exec code
 
+# Administrador de tareas
+bindsym $mod+Shift+Escape exec --no-startup-id /usr/bin/flatpak run io.missioncenter.MissionCenter
+
 # Calculadora (SpeedCrunch)
 bindsym XF86Calculator exec --no-startup-id speedcrunch
 
