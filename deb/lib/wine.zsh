@@ -58,11 +58,60 @@ _wine_abs_path() {
 	# Wine requiere WINEPREFIX absoluto. Expandimos ~ y convertimos relativo -> absoluto.
 	if [[ "$path" == "~" ]]; then
 		path="$HOME"
-	elif [[ "$path" == ~/* ]]; then
-		path="$HOME/${path#~/}"
+	elif [[ "$path" == "~/"* ]]; then
+		# En zsh, ${var#~/} no siempre trata ~ como literal; usamos reemplazo anclado.
+		path="${path/#\~\//$HOME/}"
 	fi
 
 	print -r -- "${path:A}"
+}
+
+_wine_unix_to_windows_path() {
+	local prefix_path="$1"
+	local unix_path="$2"
+	local drive_c="$prefix_path/drive_c"
+	local rel
+
+	if [[ "$unix_path" == "$drive_c"/* ]]; then
+		rel="${unix_path#$drive_c/}"
+		rel="${rel//\//\\}"
+		print -r -- "C:\\$rel"
+		return 0
+	fi
+
+	local abs="${unix_path:A}"
+	abs="${abs#/}"
+	abs="${abs//\//\\}"
+	print -r -- "Z:\\$abs"
+}
+
+_wine_prompt_exe_path() {
+	local prompt="$1"
+	local default_value="$2"
+	local prefix_path="$3"
+	local answer="$default_value"
+
+	if [[ -o interactive ]] && (( $+builtins[vared] )); then
+		printf "${CYAN}%s${NC} [${WHITE}TAB autocompleta archivo${NC}]: " "$prompt" > /dev/tty
+		if ! vared -c answer < /dev/tty > /dev/tty 2>/dev/null; then
+			read -r answer < /dev/tty
+		fi
+	else
+		if [[ -n "$default_value" ]]; then
+			printf "${CYAN}%s${NC} [${WHITE}%s${NC}]: " "$prompt" "$default_value" > /dev/tty
+		else
+			printf "${CYAN}%s${NC}: " "$prompt" > /dev/tty
+		fi
+		read -r answer < /dev/tty
+	fi
+
+	[[ -z "$answer" ]] && answer="$default_value"
+
+	if [[ -n "$answer" && -f "$answer" ]]; then
+		answer="$(_wine_unix_to_windows_path "$prefix_path" "$answer")"
+	fi
+
+	print -r -- "$answer"
 }
 
 _wine_collect_winetricks_verbs() {
@@ -107,6 +156,32 @@ _createwine_complete() {
 		"-h:Mostrar ayuda"
 	)
 	_describe -t createwine-options "createwine option" opts
+}
+
+_removewine_complete() {
+	local -a opts
+	opts=(
+		"--prefix:Ruta del WINEPREFIX a eliminar"
+		"--yes:No pedir confirmaciones"
+		"--help:Mostrar ayuda"
+		"-h:Mostrar ayuda"
+	)
+	_describe -t removewine-options "removewine option" opts
+}
+
+_wine_prefix_from_init_file() {
+	local init_file="$1"
+	[[ -f "$init_file" ]] || return 1
+
+	local line value
+	line="$(command grep -E '^export WINEPREFIX=".*"$' "$init_file" 2>/dev/null | head -n 1)"
+	[[ -n "$line" ]] || return 1
+
+	value="${line#export WINEPREFIX=\"}"
+	value="${value%\"}"
+	[[ -n "$value" ]] || return 1
+
+	print -r -- "$value"
 }
 
 createwine() {
@@ -195,7 +270,7 @@ createwine() {
 		fi
 	fi
 
-	app_exe="$(_wine_prompt "Ruta del .exe dentro de Wine (ej: C:\\Program Files\\MiApp\\miapp.exe)" "")"
+	app_exe="$(_wine_prompt_exe_path "Ruta del .exe (TAB para autocompletar archivo .exe/.msi o pega ruta Wine)" "" "$prefix_path")"
 
 	init_file="$PWD/init.sh"
 	if [[ -f "$init_file" ]]; then
@@ -241,7 +316,126 @@ EOF
 
 alias cwine='createwine'
 
+removewine() {
+	local prefix_input=""
+	local prefix_path=""
+	local assume_yes=0
+	local remove_local_init=0
+	local -a extra_args
+
+	while (( $# > 0 )); do
+		case "$1" in
+			--prefix)
+				if [[ -z "${2:-}" ]]; then
+					print -r -- "${RED}Falta valor para --prefix.${NC}"
+					return 1
+				fi
+				prefix_input="$2"
+				shift 2
+				;;
+			--yes)
+				assume_yes=1
+				shift
+				;;
+			-h|--help)
+				print -r -- "Uso: removewine [--prefix RUTA] [--yes]"
+				print -r -- "Elimina un WINEPREFIX (incluyendo componentes instalados con winetricks)."
+				print -r -- ""
+				print -r -- "Opciones:"
+				print -r -- "  --prefix RUTA   WINEPREFIX a eliminar."
+				print -r -- "  --yes           No pedir confirmaciones."
+				print -r -- ""
+				print -r -- "Alias: rwine"
+				return 0
+				;;
+			*)
+				extra_args+=("$1")
+				shift
+				;;
+		esac
+	done
+
+	if (( ${#extra_args[@]} > 0 )); then
+		if [[ -z "$prefix_input" && ${#extra_args[@]} -eq 1 ]]; then
+			prefix_input="${extra_args[1]}"
+		else
+			print -r -- "${YELLOW}Argumentos no reconocidos: ${extra_args[*]}${NC}"
+			print -r -- "Usa: removewine --help"
+			return 1
+		fi
+	fi
+
+	if [[ -z "$prefix_input" ]]; then
+		prefix_input="$(_wine_prefix_from_init_file "$PWD/init.sh" 2>/dev/null || true)"
+		if [[ -z "$prefix_input" ]]; then
+			prefix_input="$(_wine_prompt "WINEPREFIX a eliminar" "~/wineprefixes/miapp")"
+		else
+			if (( ! assume_yes )); then
+				prefix_input="$(_wine_prompt "WINEPREFIX a eliminar" "$prefix_input")"
+			fi
+		fi
+	fi
+
+	prefix_path="$(_wine_abs_path "$prefix_input")"
+
+	if [[ -z "$prefix_path" || "$prefix_path" == "/" ]]; then
+		print -r -- "${RED}Ruta inválida para WINEPREFIX: $prefix_input${NC}"
+		return 1
+	fi
+
+	if [[ ! -d "$prefix_path" ]]; then
+		print -r -- "${YELLOW}No existe el prefix: $prefix_path${NC}"
+		return 1
+	fi
+
+	if [[ "$prefix_path" == "$HOME" ]]; then
+		print -r -- "${RED}Se bloqueó la operación para evitar borrar HOME completo.${NC}"
+		return 1
+	fi
+
+	write_header "WINE PROFILE REMOVER" "$RED"
+	write_item "Prefix" "$prefix_path"
+	print -r -- ""
+
+	if (( ! assume_yes )) && ! _wine_confirm "¿Eliminar este WINEPREFIX de forma permanente?" "n"; then
+		print -r -- "${YELLOW}Operación cancelada.${NC}"
+		return 0
+	fi
+
+	if ! rm -rf -- "$prefix_path"; then
+		print -r -- "${RED}No se pudo eliminar: $prefix_path${NC}"
+		return 1
+	fi
+
+	if [[ -f "$PWD/init.sh" ]]; then
+		local current_init_prefix=""
+		current_init_prefix="$(_wine_prefix_from_init_file "$PWD/init.sh" 2>/dev/null || true)"
+		if [[ -n "$current_init_prefix" ]]; then
+			current_init_prefix="$(_wine_abs_path "$current_init_prefix")"
+			if [[ "$current_init_prefix" == "$prefix_path" ]]; then
+				if (( assume_yes )); then
+					remove_local_init=1
+				elif _wine_confirm "init.sh en este directorio apunta a ese prefix. ¿Eliminar también init.sh?" "y"; then
+					remove_local_init=1
+				fi
+			fi
+		fi
+	fi
+
+	if (( remove_local_init )); then
+		rm -f -- "$PWD/init.sh"
+	fi
+
+	print -r -- "${GREEN}WINEPREFIX eliminado correctamente.${NC}"
+	if (( remove_local_init )); then
+		print -r -- "${GREEN}También se eliminó init.sh local.${NC}"
+	fi
+}
+
+alias rwine='removewine'
+
 if (( $+functions[compdef] )); then
 	compdef _winetricks_verbs_complete winetricks
 	compdef _createwine_complete createwine cwine
+	compdef _removewine_complete removewine rwine
 fi
