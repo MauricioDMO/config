@@ -9,15 +9,23 @@ done
 
 capacity=$(cat "$bat/capacity" 2>/dev/null)
 status=$(cat "$bat/status" 2>/dev/null)
+on_ac=0
 
-if [ "$capacity" = "100" ]; then
-    prefix="BAT "
+for supply in /sys/class/power_supply/*; do
+    [ -r "$supply/type" ] || continue
+    read -r type < "$supply/type" || continue
+    [ "$type" = "Mains" ] || continue
+
+    if [ -r "$supply/online" ]; then
+        read -r online < "$supply/online" || online=0
+        [ "$online" = "1" ] && on_ac=1
+    fi
+done
+
+if [ "$on_ac" = "1" ]; then
+    prefix="⚡"
 else
-    case "$status" in
-        Charging) prefix="⚡" ;;
-        Full) prefix="BAT " ;;
-        *) prefix="BAT " ;;
-    esac
+    prefix="BAT "
 fi
 
 time_str=""

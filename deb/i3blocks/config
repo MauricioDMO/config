@@ -22,6 +22,10 @@ interval=5
 command=~/.config/i3blocks/scripts/battery.sh
 interval=10
 
+[power_mode]
+command=~/.config/i3blocks/scripts/power_mode.sh
+interval=5
+
 [cpu_temp]
 command=~/.config/i3blocks/scripts/cpu_temp.sh /sys/class/thermal/thermal_zone5/temp
 interval=5

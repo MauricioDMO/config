@@ -1,0 +1,13 @@
+[Unit]
+Description=Thermal guard for Dell laptop power policy
+After=multi-user.target thermald.service
+Wants=thermald.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/thermal-guard
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
