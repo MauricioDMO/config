@@ -9,27 +9,31 @@ signal=$(printf '%s\n' "$line" | awk -F: '{print $3}')
 ip=$(ip -4 -o addr show dev "$iface" | awk '{split($4,a,"/"); print a[1]; exit}')
 
 copy_to_clipboard() {
-	if command -v wl-copy >/dev/null 2>&1; then
-		printf '%s' "$1" | wl-copy
-	elif command -v xclip >/dev/null 2>&1; then
-		printf '%s' "$1" | xclip -selection clipboard
-	elif command -v xsel >/dev/null 2>&1; then
-		printf '%s' "$1" | xsel --clipboard --input
+	local value=$1
+
+	if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null 2>&1; then
+		printf '%s' "$value" | wl-copy
+	elif [ -n "${DISPLAY:-}" ] && command -v xclip >/dev/null 2>&1; then
+		printf '%s' "$value" | xclip -selection clipboard
+	elif [ -n "${DISPLAY:-}" ] && command -v xsel >/dev/null 2>&1; then
+		printf '%s' "$value" | xsel --clipboard --input
 	elif command -v pbcopy >/dev/null 2>&1; then
-		printf '%s' "$1" | pbcopy
+		printf '%s' "$value" | pbcopy
 	else
+		notify-send -i dialog-error "No se copio" "No hay backend de portapapeles disponible" -t 2000
 		return 1
 	fi
-	notify-send -i dialog-information "Copiado" "IP copiado al portapapeles" -t 1500
+
+	if [ "$?" -eq 0 ]; then
+		notify-send -i dialog-information "Copiado" "IP copiado al portapapeles" -t 1500
+	else
+		notify-send -i dialog-error "No se copio" "Fallo al copiar IP" -t 2000
+		return 1
+	fi
 }
 
-case "${BLOCK_BUTTON:-}" in
-	1)
-		[ -n "$ip" ] && copy_to_clipboard "$ip"
-		;;
-	2)
-		[ -n "$ssid" ] && copy_to_clipboard "$ssid"
-		;;
-esac
+if [ "${BLOCK_BUTTON:-}" = "1" ] && [ -n "$ip" ]; then
+	copy_to_clipboard "$ip"
+fi
 
 printf 'WiFi <span foreground="#bb9af7">%s</span> <span foreground="#9ece6a">%s%%</span> <span foreground="#c0caf5">%s</span>\n' "$ssid" "$signal" "$ip"
