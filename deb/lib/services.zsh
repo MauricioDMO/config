@@ -22,6 +22,25 @@ essh() {
 # Abre VS Code aquí
 oc() { code .; }
 
+# Bloquea la laptop con i3lock usando una imagen aleatoria
+lock-laptop() {
+    local -a images=("$HOME/core/config/lock/troll"/*(.N))
+    local image forest_green lock_display lock_xauthority
+
+    if (( ${#images} == 0 )); then
+        printf "${RED}Error: no se encontraron imágenes en %s.${NC}\n" "$HOME/core/config/lock/troll"
+        return 1
+    fi
+
+    image="${images[$((RANDOM % ${#images} + 1))]}"
+    forest_green="#228B22"
+    lock_display="${DISPLAY:-:0}"
+    lock_xauthority="${XAUTHORITY:-$HOME/.Xauthority}"
+
+    printf "${CYAN}Bloqueando con %s...${NC}\n" "${image:t}"
+    DISPLAY="$lock_display" XAUTHORITY="$lock_xauthority" i3lock -n -t -c "${forest_green#\#}" -i "$image"
+}
+
 # Monta la partición de Windows cifrada con BitLocker
 mount-win() {
     local device="${BITLOCKER_DEVICE:-/dev/nvme0n1p3}"

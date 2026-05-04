@@ -33,6 +33,7 @@ help_config() {
     _help_section "System" \
         "size|Ver tamaño de directorio/archivo detallado" \
         "essh|Habilitar/Iniciar SSH Agent" \
+        "lock-laptop|Bloquear laptop con i3lock e imagen aleatoria" \
         "mount-win|Montar partición Windows (BitLocker)" \
         "umount-win|Desmontar partición Windows"
 
