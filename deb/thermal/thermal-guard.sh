@@ -9,20 +9,20 @@ set -u
 # - Battery: quiet profile, turbo off, reduced CPU cap.
 
 INTERVAL_SECONDS="${THERMAL_GUARD_INTERVAL_SECONDS:-5}"
-WARN_REPEAT_SECONDS="${THERMAL_GUARD_WARN_REPEAT_SECONDS:-180}"
 NOTIFY_TIMEOUT_MS="${THERMAL_GUARD_NOTIFY_TIMEOUT_MS:-5000}"
 
-CPU_WARN_C="${THERMAL_GUARD_CPU_WARN_C:-80}"
+CPU_WARN_C="${THERMAL_GUARD_CPU_WARN_C:-82}"
 CPU_HOT_C="${THERMAL_GUARD_CPU_HOT_C:-88}"
 CPU_CRITICAL_C="${THERMAL_GUARD_CPU_CRITICAL_C:-94}"
 
-TMEM_WARN_C="${THERMAL_GUARD_TMEM_WARN_C:-75}"
-TMEM_HOT_C="${THERMAL_GUARD_TMEM_HOT_C:-78}"
-TMEM_CRITICAL_C="${THERMAL_GUARD_TMEM_CRITICAL_C:-82}"
+TMEM_HOT_C="${THERMAL_GUARD_TMEM_HOT_C:-82}"
+TMEM_CRITICAL_C="${THERMAL_GUARD_TMEM_CRITICAL_C:-86}"
 
 CPU_RESTORE_C="${THERMAL_GUARD_CPU_RESTORE_C:-72}"
-TMEM_RESTORE_C="${THERMAL_GUARD_TMEM_RESTORE_C:-68}"
+TMEM_RESTORE_C="${THERMAL_GUARD_TMEM_RESTORE_C:-78}"
 RESTORE_SAMPLES="${THERMAL_GUARD_RESTORE_SAMPLES:-12}"
+MIN_AC_PERFORMANCE_SECONDS="${THERMAL_GUARD_MIN_AC_PERFORMANCE_SECONDS:-120}"
+MIN_COOL_SECONDS="${THERMAL_GUARD_MIN_COOL_SECONDS:-45}"
 
 AC_HOT_MAX_PERF="${THERMAL_GUARD_AC_HOT_MAX_PERF:-60}"
 AC_CRITICAL_MAX_PERF="${THERMAL_GUARD_AC_CRITICAL_MAX_PERF:-40}"
@@ -30,7 +30,7 @@ AC_BALANCED_MAX_PERF="${THERMAL_GUARD_AC_BALANCED_MAX_PERF:-85}"
 BATTERY_MAX_PERF="${THERMAL_GUARD_BATTERY_MAX_PERF:-45}"
 BATTERY_HOT_MAX_PERF="${THERMAL_GUARD_BATTERY_HOT_MAX_PERF:-35}"
 
-CPU_PKG_TEMP="/sys/class/thermal/thermal_zone5/temp"
+CPU_PKG_TEMP="/sys/class/thermal/thermal_zone6/temp"
 CPU_ACPI_TEMP="/sys/class/thermal/thermal_zone3/temp"
 TMEM_TEMP="/sys/class/thermal/thermal_zone2/temp"
 PLATFORM_PROFILE="/sys/firmware/acpi/platform_profile"
@@ -39,8 +39,9 @@ INTEL_NO_TURBO="/sys/devices/system/cpu/intel_pstate/no_turbo"
 INTEL_MAX_PERF="/sys/devices/system/cpu/intel_pstate/max_perf_pct"
 
 last_policy=""
-last_warn_at=0
+last_policy_at=0
 restore_count=0
+dell_smm_hwmon=""
 
 log() {
     printf '%s thermal-guard: %s\n' "$(date '+%F %T')" "$*"
@@ -122,11 +123,9 @@ set_profile() {
 }
 
 set_turbo() {
-    local enabled="$1"
-
     [ -w "$INTEL_NO_TURBO" ] || return 0
 
-    if [ "$enabled" = "1" ]; then
+    if [ "$1" = "1" ]; then
         write_sysfs "$INTEL_NO_TURBO" 0
     else
         write_sysfs "$INTEL_NO_TURBO" 1
@@ -134,10 +133,65 @@ set_turbo() {
 }
 
 set_max_perf() {
-    local pct="$1"
-
     [ -w "$INTEL_MAX_PERF" ] || return 0
-    write_sysfs "$INTEL_MAX_PERF" "$pct"
+    write_sysfs "$INTEL_MAX_PERF" "$1"
+}
+
+dell_smm_hwmon_path() {
+    local hwmon name
+
+    if [ -n "$dell_smm_hwmon" ] && [ -w "$dell_smm_hwmon/pwm1" ]; then
+        printf '%s\n' "$dell_smm_hwmon"
+        return 0
+    fi
+
+    for hwmon in /sys/class/hwmon/hwmon*; do
+        [ -r "$hwmon/name" ] || continue
+        read -r name < "$hwmon/name" || continue
+        [ "$name" = "dell_smm" ] || continue
+        dell_smm_hwmon="$hwmon"
+        printf '%s\n' "$hwmon"
+        return 0
+    done
+
+    return 1
+}
+
+set_fans_max() {
+    local hwmon
+    hwmon="$(dell_smm_hwmon_path)" || return 0
+    write_sysfs "$hwmon/pwm1" 255
+}
+
+policy_elapsed_seconds() {
+    local now
+
+    [ "$last_policy_at" -gt 0 ] || { printf '999999\n'; return 0; }
+    now="$(date +%s)"
+    printf '%s\n' "$((now - last_policy_at))"
+}
+
+can_apply_policy() {
+    local policy="$1"
+    local elapsed
+
+    [ -n "$last_policy" ] || return 0
+    elapsed="$(policy_elapsed_seconds)"
+
+    if [ "$last_policy" = "ac_performance" ] && [ "$policy" = "ac_balanced" ] && [ "$elapsed" -lt "$MIN_AC_PERFORMANCE_SECONDS" ]; then
+        return 1
+    fi
+
+    case "$last_policy:$policy" in
+        ac_hot:ac_critical)
+            return 0
+            ;;
+        ac_hot:*|ac_critical:*|battery_hot:*)
+            [ "$elapsed" -ge "$MIN_COOL_SECONDS" ] || return 1
+            ;;
+    esac
+
+    return 0
 }
 
 active_graphical_user() {
@@ -159,10 +213,24 @@ active_graphical_user() {
     return 1
 }
 
+run_as_graphical_user() {
+    local user="$1"
+    local display="$2"
+    local xauthority="$3"
+    local runtime_dir="$4"
+    shift 4
+
+    runuser -u "$user" -- env \
+        DISPLAY="$display" \
+        XAUTHORITY="$xauthority" \
+        DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime_dir/bus" \
+        "$@" >/dev/null 2>&1 || true
+}
+
 notify_user() {
     local title="$1"
     local body="$2"
-    local urgency="${3:-critical}"
+    local urgency="${3:-normal}"
     local style="${4:-default}"
     local identity uid user home_dir runtime_dir display xauthority
     local -a notify_args
@@ -185,43 +253,21 @@ notify_user() {
         notify_args+=(-h string:bgcolor:#006400 -h string:fgcolor:#ffffff)
     fi
 
-    runuser -u "$user" -- env \
-        DISPLAY="$display" \
-        XAUTHORITY="$xauthority" \
-        DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime_dir/bus" \
-        notify-send "${notify_args[@]}" "$title" "$body" >/dev/null 2>&1 || true
-
-    runuser -u "$user" -- env \
-        DISPLAY="$display" \
-        XAUTHORITY="$xauthority" \
-        DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime_dir/bus" \
-        paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga >/dev/null 2>&1 || true
-}
-
-warn_if_needed() {
-    local reason="$1"
-    local body="$2"
-    local now
-
-    now="$(date +%s)"
-    if [ $((now - last_warn_at)) -lt "$WARN_REPEAT_SECONDS" ]; then
-        return 0
-    fi
-
-    last_warn_at="$now"
-    notify_user "Laptop caliente: $reason" "$body"
+    run_as_graphical_user "$user" "$display" "$xauthority" "$runtime_dir" \
+        notify-send "${notify_args[@]}" "$title" "$body"
+    run_as_graphical_user "$user" "$display" "$xauthority" "$runtime_dir" \
+        paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga
 }
 
 policy_code() {
-    case "$1" in
-        ac_performance) printf '100Pt\n' ;;
-        ac_balanced) printf '%sBt\n' "$AC_BALANCED_MAX_PERF" ;;
-        ac_hot) printf '%sC\n' "$AC_HOT_MAX_PERF" ;;
-        ac_critical) printf '%sC\n' "$AC_CRITICAL_MAX_PERF" ;;
-        battery_saver) printf '%sQ\n' "$BATTERY_MAX_PERF" ;;
-        battery_hot) printf '%sC\n' "$BATTERY_HOT_MAX_PERF" ;;
-        *) printf '?\n' ;;
-    esac
+    local profile turbo max_perf code log_msg
+
+    if IFS=$'\t' read -r profile turbo max_perf code log_msg < <(policy_settings "$1"); then
+        printf '%s\n' "$code"
+        return 0
+    fi
+
+    printf '?\n'
 }
 
 is_restore_change() {
@@ -234,6 +280,22 @@ is_restore_change() {
         battery_hot:battery_saver) return 0 ;;
         *) return 1 ;;
     esac
+}
+
+policy_settings() {
+    local profile turbo max_perf code log_msg
+
+    case "$1" in
+        ac_performance) profile=performance; turbo=1; max_perf=100; code=100Pt; log_msg="AC fresco: performance, turbo on, max_perf=100" ;;
+        ac_balanced) profile=balanced; turbo=1; max_perf="$AC_BALANCED_MAX_PERF"; code="${AC_BALANCED_MAX_PERF}Bt"; log_msg="AC tibio: balanced, turbo on, max_perf=$AC_BALANCED_MAX_PERF" ;;
+        ac_hot) profile=cool; turbo=0; max_perf="$AC_HOT_MAX_PERF"; code="${AC_HOT_MAX_PERF}C"; log_msg="AC caliente: cool, turbo off, max_perf=$AC_HOT_MAX_PERF" ;;
+        ac_critical) profile=cool; turbo=0; max_perf="$AC_CRITICAL_MAX_PERF"; code="${AC_CRITICAL_MAX_PERF}C"; log_msg="AC muy caliente: cool, turbo off, max_perf=$AC_CRITICAL_MAX_PERF" ;;
+        battery_saver) profile=quiet; turbo=0; max_perf="$BATTERY_MAX_PERF"; code="${BATTERY_MAX_PERF}Q"; log_msg="bateria: quiet, turbo off, max_perf=$BATTERY_MAX_PERF" ;;
+        battery_hot) profile=cool; turbo=0; max_perf="$BATTERY_HOT_MAX_PERF"; code="${BATTERY_HOT_MAX_PERF}C"; log_msg="bateria caliente: cool, turbo off, max_perf=$BATTERY_HOT_MAX_PERF" ;;
+        *) return 1 ;;
+    esac
+
+    printf '%s\t%s\t%s\t%s\t%s\n' "$profile" "$turbo" "$max_perf" "$code" "$log_msg"
 }
 
 notify_policy_change() {
@@ -278,86 +340,83 @@ apply_policy() {
     local policy="$1"
     local body="${2:-}"
     local previous_policy="$last_policy"
+    local profile turbo max_perf code log_msg
 
     if [ "$policy" = "$last_policy" ]; then
         return 0
     fi
 
-    case "$policy" in
-        ac_performance)
-            set_profile performance
-            set_turbo 1
-            set_max_perf 100
-            log "AC fresco: performance, turbo on, max_perf=100"
-            ;;
-        ac_balanced)
-            set_profile balanced
-            set_turbo 1
-            set_max_perf "$AC_BALANCED_MAX_PERF"
-            log "AC tibio: balanced, turbo on, max_perf=$AC_BALANCED_MAX_PERF"
-            ;;
-        ac_hot)
-            set_profile cool
-            set_turbo 0
-            set_max_perf "$AC_HOT_MAX_PERF"
-            log "AC caliente: cool, turbo off, max_perf=$AC_HOT_MAX_PERF"
-            ;;
-        ac_critical)
-            set_profile cool
-            set_turbo 0
-            set_max_perf "$AC_CRITICAL_MAX_PERF"
-            log "AC muy caliente: cool, turbo off, max_perf=$AC_CRITICAL_MAX_PERF"
-            ;;
-        battery_saver)
-            set_profile quiet
-            set_turbo 0
-            set_max_perf "$BATTERY_MAX_PERF"
-            log "bateria: quiet, turbo off, max_perf=$BATTERY_MAX_PERF"
-            ;;
-        battery_hot)
-            set_profile cool
-            set_turbo 0
-            set_max_perf "$BATTERY_HOT_MAX_PERF"
-            log "bateria caliente: cool, turbo off, max_perf=$BATTERY_HOT_MAX_PERF"
-            ;;
-    esac
+    can_apply_policy "$policy" || return 0
+
+    IFS=$'\t' read -r profile turbo max_perf code log_msg < <(policy_settings "$policy") || return 0
+    set_profile "$profile"
+    set_turbo "$turbo"
+    set_max_perf "$max_perf"
+    log "$log_msg"
 
     last_policy="$policy"
+    last_policy_at="$(date +%s)"
     notify_policy_change "$policy" "$previous_policy" "$body"
 }
 
-while true; do
-    cpu_pkg_c="$(read_temp_c "$CPU_PKG_TEMP")"
-    cpu_acpi_c="$(read_temp_c "$CPU_ACPI_TEMP")"
-    tmem_c="$(read_temp_c "$TMEM_TEMP")"
-    cpu_c="$(max_temp "$cpu_pkg_c" "$cpu_acpi_c")"
-    body="CPU ${cpu_c}C, TMEM ${tmem_c}C"
+update_restore_count() {
+    local cpu_c="$1" tmem_c="$2"
 
     if [ "$cpu_c" -lt "$CPU_RESTORE_C" ] && [ "$tmem_c" -lt "$TMEM_RESTORE_C" ]; then
         restore_count="$((restore_count + 1))"
     else
         restore_count=0
     fi
+}
+
+choose_ac_policy() {
+    local cpu_c="$1" tmem_c="$2"
+
+    if [ "$cpu_c" -ge "$CPU_CRITICAL_C" ] || [ "$tmem_c" -ge "$TMEM_CRITICAL_C" ]; then
+        printf '%s\n' ac_critical
+    elif [ "$cpu_c" -ge "$CPU_HOT_C" ] || [ "$tmem_c" -ge "$TMEM_HOT_C" ]; then
+        printf '%s\n' ac_hot
+    elif [ "$cpu_c" -ge "$CPU_WARN_C" ]; then
+        printf '%s\n' ac_balanced
+    elif [ "$restore_count" -lt "$RESTORE_SAMPLES" ] && { [ "$last_policy" = "ac_hot" ] || [ "$last_policy" = "ac_critical" ]; }; then
+        printf '%s\n' ac_balanced
+    elif [ "$restore_count" -ge "$RESTORE_SAMPLES" ] || [ -z "$last_policy" ]; then
+        printf '%s\n' ac_performance
+    fi
+}
+
+choose_battery_policy() {
+    local cpu_c="$1" tmem_c="$2"
+
+    if [ "$cpu_c" -ge "$CPU_HOT_C" ] || [ "$tmem_c" -ge "$TMEM_HOT_C" ]; then
+        printf '%s\n' battery_hot
+        return 0
+    fi
+
+    printf '%s\n' battery_saver
+}
+
+set_fans_max
+
+while true; do
+    set_fans_max
+
+    cpu_pkg_c="$(read_temp_c "$CPU_PKG_TEMP")"
+    cpu_acpi_c="$(read_temp_c "$CPU_ACPI_TEMP")"
+    tmem_c="$(read_temp_c "$TMEM_TEMP")"
+    cpu_c="$(max_temp "$cpu_pkg_c" "$cpu_acpi_c")"
+    body="CPU ${cpu_c}C, TMEM ${tmem_c}C"
+    policy=""
+
+    update_restore_count "$cpu_c" "$tmem_c"
 
     if on_ac_power; then
-        if [ "$cpu_c" -ge "$CPU_CRITICAL_C" ] || [ "$tmem_c" -ge "$TMEM_CRITICAL_C" ]; then
-            apply_policy ac_critical "$body"
-        elif [ "$cpu_c" -ge "$CPU_HOT_C" ] || [ "$tmem_c" -ge "$TMEM_HOT_C" ]; then
-            apply_policy ac_hot "$body"
-        elif [ "$cpu_c" -ge "$CPU_WARN_C" ] || [ "$tmem_c" -ge "$TMEM_WARN_C" ]; then
-            apply_policy ac_balanced "$body"
-        elif [ "$restore_count" -lt "$RESTORE_SAMPLES" ] && { [ "$last_policy" = "ac_hot" ] || [ "$last_policy" = "ac_critical" ]; }; then
-            apply_policy ac_balanced "$body"
-        elif [ "$restore_count" -ge "$RESTORE_SAMPLES" ] || [ -z "$last_policy" ]; then
-            apply_policy ac_performance "$body"
-        fi
+        policy="$(choose_ac_policy "$cpu_c" "$tmem_c")"
     else
-        if [ "$cpu_c" -ge "$CPU_HOT_C" ] || [ "$tmem_c" -ge "$TMEM_HOT_C" ]; then
-            apply_policy battery_hot "$body"
-        else
-            apply_policy battery_saver "$body"
-        fi
+        policy="$(choose_battery_policy "$cpu_c" "$tmem_c")"
     fi
+
+    [ -n "$policy" ] && apply_policy "$policy" "$body"
 
     sleep "$INTERVAL_SECONDS"
 done
