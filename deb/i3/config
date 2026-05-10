@@ -259,14 +259,15 @@ exec --no-startup-id lxpolkit
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 111111
 
 # --- Scripts y configuraciones persistentes (exec_always) ---
-# Iniciar CopyQ al arrancar
-exec_always --no-startup-id sh -c 'sleep 3 && pgrep -x copyq >/dev/null || copyq'
+# Iniciar CopyQ al arrancar (con delay solo en primer login)
+exec_always --no-startup-id sh -c 'if [ ! -f /tmp/i3-startup-copyq ]; then sleep 3; touch /tmp/i3-startup-copyq; fi && pgrep -x copyq >/dev/null || copyq'
 
 # Configuración de monitores (si existe el script)
 exec_always --no-startup-id ~/.screenlayout/dock.sh
 
 # Fondo de pantalla aleatorio (si hay imágenes en ~/core/config/bg/)
-exec_always --no-startup-id sh -c 'sleep 1 && img=$(find ~/core/config/bg -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
+# Con delay solo en primer login
+exec_always --no-startup-id sh -c 'if [ ! -f /tmp/i3-startup-bg ]; then sleep 1.5; touch /tmp/i3-startup-bg; fi && img=$(find ~/core/config/bg -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
 
 # Configuración de periféricos (Scroll natural para Touchpad y Mouse)
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
