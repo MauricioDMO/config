@@ -19,9 +19,6 @@ essh() {
     fi
 }
 
-# Abre VS Code aquí
-oc() { code .; }
-
 # Bloquea la laptop con i3lock usando una imagen aleatoria
 lock-laptop() {
     local -a images=("$HOME/core/config/lock/troll"/*(.N))
