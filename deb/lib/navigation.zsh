@@ -61,7 +61,7 @@ dps() {
 }
 
 # Abre gestor de archivos (thunar) en la ruta especificada
-e() { thunar "${1:-.}" >/dev/null 2>&1; }
+e() { thunar "${1:-.}" >/dev/null 2>&1 &!; }
 
 # Abre ranger y cambia al directorio al salir
 r() {
