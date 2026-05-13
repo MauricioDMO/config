@@ -30,9 +30,12 @@ AC_BALANCED_MAX_PERF="${THERMAL_GUARD_AC_BALANCED_MAX_PERF:-85}"
 BATTERY_MAX_PERF="${THERMAL_GUARD_BATTERY_MAX_PERF:-45}"
 BATTERY_HOT_MAX_PERF="${THERMAL_GUARD_BATTERY_HOT_MAX_PERF:-35}"
 
-CPU_PKG_TEMP="/sys/class/thermal/thermal_zone6/temp"
-CPU_ACPI_TEMP="/sys/class/thermal/thermal_zone3/temp"
-TMEM_TEMP="/sys/class/thermal/thermal_zone2/temp"
+CPU_PKG_TEMP="${THERMAL_GUARD_CPU_PKG_TEMP:-}"
+CPU_ACPI_TEMP="${THERMAL_GUARD_CPU_ACPI_TEMP:-}"
+TMEM_TEMP="${THERMAL_GUARD_TMEM_TEMP:-}"
+DEFAULT_CPU_PKG_TEMP="/sys/class/thermal/thermal_zone6/temp"
+DEFAULT_CPU_ACPI_TEMP="/sys/class/thermal/thermal_zone3/temp"
+DEFAULT_TMEM_TEMP="/sys/class/thermal/thermal_zone2/temp"
 PLATFORM_PROFILE="/sys/firmware/acpi/platform_profile"
 PLATFORM_PROFILE_CHOICES="/sys/firmware/acpi/platform_profile_choices"
 INTEL_NO_TURBO="/sys/devices/system/cpu/intel_pstate/no_turbo"
@@ -71,6 +74,40 @@ max_temp() {
     done
 
     printf '%s\n' "$max"
+}
+
+find_temp_by_label() {
+    local pattern="$1"
+    local label_file label lower input
+
+    for label_file in /sys/class/hwmon/hwmon*/temp*_label; do
+        [ -r "$label_file" ] || continue
+        read -r label < "$label_file" || continue
+        lower="${label,,}"
+
+        case "$lower" in
+            *"$pattern"*)
+                input="${label_file%_label}_input"
+                [ -r "$input" ] && { printf '%s\n' "$input"; return 0; }
+                ;;
+        esac
+    done
+
+    return 1
+}
+
+resolve_temp_paths() {
+    if [ -z "$CPU_PKG_TEMP" ]; then
+        CPU_PKG_TEMP="$(find_temp_by_label "package id" || find_temp_by_label "tctl" || printf '%s\n' "$DEFAULT_CPU_PKG_TEMP")"
+    fi
+
+    if [ -z "$CPU_ACPI_TEMP" ]; then
+        CPU_ACPI_TEMP="$(find_temp_by_label "acpitz" || printf '%s\n' "$DEFAULT_CPU_ACPI_TEMP")"
+    fi
+
+    if [ -z "$TMEM_TEMP" ]; then
+        TMEM_TEMP="$(find_temp_by_label "tmem" || find_temp_by_label "memory" || printf '%s\n' "$DEFAULT_TMEM_TEMP")"
+    fi
 }
 
 on_ac_power() {
@@ -396,6 +433,8 @@ choose_battery_policy() {
     printf '%s\n' battery_saver
 }
 
+resolve_temp_paths
+log "sensores: cpu_pkg=$CPU_PKG_TEMP cpu_acpi=$CPU_ACPI_TEMP tmem=$TMEM_TEMP"
 set_fans_max
 
 while true; do

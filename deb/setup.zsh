@@ -27,28 +27,36 @@ as_root() {
   fi
 }
 
+as_user() {
+  if [ "$(id -u)" -eq 0 ]; then
+    sudo -u "$TARGET_USER" env HOME="$TARGET_HOME" "$@"
+  else
+    "$@"
+  fi
+}
+
 # Enlazar configuraciones de i3 y i3status a la carpeta de configuración del usuario
-mkdir -p "$TARGET_HOME/.config/i3"
-ln -sfn "$REPO_DIR/deb/i3/config" "$TARGET_HOME/.config/i3/config"
+as_user mkdir -p "$TARGET_HOME/.config/i3"
+as_user ln -sfn "$REPO_DIR/deb/i3/config" "$TARGET_HOME/.config/i3/config"
 
 # Migracion a i3blocks
 # ln -sfn ~/.config/config/deb/i3status/config ~/.config/i3status/config
-mkdir -p "$TARGET_HOME/.config/i3blocks"
-ln -sfn "$REPO_DIR/deb/i3blocks/config" "$TARGET_HOME/.config/i3blocks/config"
-ln -sfn "$REPO_DIR/deb/i3blocks/scripts" "$TARGET_HOME/.config/i3blocks/scripts"
+as_user mkdir -p "$TARGET_HOME/.config/i3blocks"
+as_user ln -sfn "$REPO_DIR/deb/i3blocks/config" "$TARGET_HOME/.config/i3blocks/config"
+as_user ln -sfn "$REPO_DIR/deb/i3blocks/scripts" "$TARGET_HOME/.config/i3blocks/scripts"
 chmod +x "$REPO_DIR"/deb/i3blocks/scripts/*.sh
 
 # Enlazar configuraciones de XFCE4 a la carpeta de configuración del usuario
-mkdir -p "$TARGET_HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
-ln -sfn "$REPO_DIR/deb/xfce4/xfce4-power-manager.xml" "$TARGET_HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml"
+as_user mkdir -p "$TARGET_HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
+as_user ln -sfn "$REPO_DIR/deb/xfce4/xfce4-power-manager.xml" "$TARGET_HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml"
 
 # Enlazar configuraciones de terminal a la carpeta de configuración del usuario
-ln -sfn "$REPO_DIR/deb/terminal/.p10k.zsh" "$TARGET_HOME/.p10k.zsh"
+as_user ln -sfn "$REPO_DIR/deb/terminal/.p10k.zsh" "$TARGET_HOME/.p10k.zsh"
 
 # Enlazar configuraciones de Ghostty a la carpeta de configuración del usuario
-mkdir -p "$TARGET_HOME/.config/ghostty"
-ln -sfn "$REPO_DIR/deb/ghostty/config" "$TARGET_HOME/.config/ghostty/config"
-ln -sfn "$REPO_DIR/deb/ghostty/themes" "$TARGET_HOME/.config/ghostty/themes"
+as_user mkdir -p "$TARGET_HOME/.config/ghostty"
+as_user ln -sfn "$REPO_DIR/deb/ghostty/config" "$TARGET_HOME/.config/ghostty/config"
+as_user ln -sfn "$REPO_DIR/deb/ghostty/themes" "$TARGET_HOME/.config/ghostty/themes"
 
 # Enlazar configuraciones de X11 a la carpeta de configuración del sistema
 as_root mkdir -p /etc/X11/xorg.conf.d

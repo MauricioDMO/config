@@ -84,8 +84,8 @@ bindsym Print exec flameshot gui
 bindsym $mod+Shift+s exec flameshot gui
 
 # --- Idioma del Teclado ---
-# Alternar entre US y Latam con Mod+Espacio
-bindsym $mod+Space exec setxkbmap -layout "us,latam" -option "grp:alt_shift_toggle"
+# Alternar entre US y Latam solo con Mod+Espacio
+bindsym $mod+Space exec --no-startup-id sh -c 'layout=$(setxkbmap -query | awk "/layout:/ {print \$2}"); case "$layout" in us*) setxkbmap latam ;; *) setxkbmap us ;; esac'
 
 # ------------------------------------------------------------------------------
 # 5. NAVEGACIÓN DE VENTANAS (Foco)
@@ -263,11 +263,11 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 111111
 exec_always --no-startup-id sh -c 'if [ ! -f /tmp/i3-startup-copyq ]; then sleep 3; touch /tmp/i3-startup-copyq; fi && pgrep -x copyq >/dev/null || copyq'
 
 # Configuración de monitores (si existe el script)
-exec_always --no-startup-id ~/.screenlayout/dock.sh
+exec_always --no-startup-id sh -c '[ -x "$HOME/.screenlayout/dock.sh" ] && "$HOME/.screenlayout/dock.sh" || true'
 
 # Fondo de pantalla aleatorio (si hay imágenes en ~/core/config/bg/)
 # Con delay solo en primer login
-exec_always --no-startup-id sh -c 'if [ ! -f /tmp/i3-startup-bg ]; then sleep 1.5; touch /tmp/i3-startup-bg; fi && img=$(find ~/core/config/bg -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
+exec_always --no-startup-id sh -c 'bg_dir="$HOME/core/config/bg"; [ -d "$bg_dir" ] || exit 0; if [ ! -f /tmp/i3-startup-bg ]; then sleep 1.5; touch /tmp/i3-startup-bg; fi; img=$(find "$bg_dir" -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
 
 # Configuración de periféricos (Scroll natural para Touchpad y Mouse)
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
@@ -275,5 +275,5 @@ exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchp
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Scroll Method Enabled" 1 0 0 2>/dev/null || true'
 exec_always --no-startup-id sh -c 'xinput set-prop "PS/2 Generic Mouse" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
 
-# Forzar layout de teclado al inicio
-exec_always --no-startup-id setxkbmap -layout "us,latam" -option "grp:win_space_toggle"
+# Forzar layout inicial sin atajos extra de XKB; el cambio queda solo en Mod+Espacio.
+exec_always --no-startup-id setxkbmap us
