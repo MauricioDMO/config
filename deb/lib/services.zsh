@@ -19,6 +19,85 @@ essh() {
     fi
 }
 
+# Administra servicios frecuentes con nombres cortos y autocompletado.
+svc() {
+    local action="$1"
+    shift
+
+    if [[ -z "$action" || "$#" -eq 0 ]]; then
+        echo "Uso: svc <start|stop|restart|status|enable|disable> <servicio...>"
+        return 1
+    fi
+
+    local -a units
+    local svc
+    for svc in "$@"; do
+        case "$svc" in
+            postgres)
+                units+=(postgresql.service)
+                ;;
+            docker)
+                units+=(containerd.service docker.service)
+                ;;
+            virtualbox)
+                units+=(vboxdrv.service vboxweb-service.service vboxautostart-service.service vboxballoonctrl-service.service)
+                ;;
+            snap)
+                units+=(snapd.socket snapd.service snapd.seeded.service snapd.apparmor.service snapd.recovery-chooser-trigger.service)
+                ;;
+            tor)
+                units+=(tor@default.service)
+                ;;
+            cups)
+                units+=(cups.service cups-browsed.service)
+                ;;
+            bluetooth)
+                units+=(bluetooth.service)
+                ;;
+            ssh)
+                units+=(ssh.service)
+                ;;
+            wait-online)
+                units+=(NetworkManager-wait-online.service)
+                ;;
+            *)
+                echo "Servicio no registrado: $svc"
+                return 1
+                ;;
+        esac
+    done
+
+    case "$action" in
+        start|stop|restart|status)
+            sudo systemctl "$action" "${units[@]}"
+            ;;
+        enable)
+            sudo systemctl enable --now "${units[@]}"
+            ;;
+        disable)
+            sudo systemctl disable --now "${units[@]}"
+            ;;
+        *)
+            echo "Acción no válida: $action"
+            return 1
+            ;;
+    esac
+}
+
+_svc_completion() {
+    local -a actions services
+    actions=(start stop restart status enable disable)
+    services=(postgres docker virtualbox snap tor cups bluetooth ssh wait-online)
+
+    if (( CURRENT == 2 )); then
+        compadd -a actions
+    else
+        compadd -a services
+    fi
+}
+
+compdef _svc_completion svc
+
 # Bloquea la laptop con i3lock usando una imagen aleatoria
 lock-laptop() {
     local -a images=("$HOME/core/config/lock/troll"/*(.N))
