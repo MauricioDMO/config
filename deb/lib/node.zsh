@@ -2,18 +2,6 @@
 # NODE.JS Y DESARROLLO
 # ========================================
 
-nclean() {
-    clear
-    printf "${CYAN}Cleaning node_modules and lock files...${NC}\n"
-    local target
-    for target in node_modules package-lock.json pnpm-lock.yaml yarn.lock; do
-        if [[ -e "$target" ]]; then
-            rm -rf "$target"
-            printf "  ${GREEN}Removed: %s${NC}\n" "$target"
-        fi
-    done
-}
-
 # Parser JSON mínimo con awk (sin python, sin jq)
 # Extrae campos simples de primer nivel de un JSON
 _json_field() {
@@ -128,62 +116,101 @@ _pkg_field() {
     }' package.json 2>/dev/null
 }
 
-ncheck() {
-    write_header "Runtime Information"
+# Administra comandos frecuentes de Node.js con nombres cortos y autocompletado.
+nd() {
+    local action="$1"
+    shift
 
-    local name cmd bin version
-    for name cmd in \
-        "Node.js" "node --version" \
-        "npm" "npm --version" \
-        "pnpm" "pnpm --version" \
-        "bun" "bun --version"; do
-        bin="${cmd%% *}"
-        if command -v "$bin" >/dev/null 2>&1; then
-            version=$(eval "$cmd" 2>/dev/null)
-            write_item "$name" "$version" "$GREEN" "$GRAY"
-        else
-            write_item "$name" "Not installed" "$GRAY" "$GRAY"
-        fi
-    done
-
-    if [[ -f "package.json" ]]; then
-        write_header "Current Project"
-        local val
-        for field in name version description; do
-            val=$(_pkg_field "$field")
-            [[ -n "$val" ]] && write_item "$field" "$val" "$GREEN" "$GRAY"
-        done
-    fi
-    echo ""
-}
-
-nscripts() {
-    if [[ ! -f "package.json" ]]; then
-        printf "\n  ${RED}[!] package.json not found.${NC}\n"
+    if [[ -z "$action" ]]; then
+        echo "Uso: nd <clean|check|scripts>"
         return 1
     fi
 
-    local scripts_output
-    # Try gawk-compatible parser first, fall back to compat
-    scripts_output=$(_parse_scripts)
-    [[ -z "$scripts_output" ]] && scripts_output=$(_parse_scripts_compat)
+    case "$action" in
+        clean)
+            clear
+            printf "${CYAN}Cleaning node_modules and lock files...${NC}\n"
 
-    if [[ -z "$scripts_output" ]]; then
-        printf "\n  ${YELLOW}[!] No scripts found in package.json.${NC}\n"
-        return
-    fi
+            local target
+            for target in node_modules package-lock.json pnpm-lock.yaml yarn.lock; do
+                if [[ -e "$target" ]]; then
+                    rm -rf "$target"
+                    printf "  ${GREEN}Removed: %s${NC}\n" "$target"
+                fi
+            done
+            ;;
+        check)
+            write_header "Runtime Information"
 
-    write_header "Available Scripts"
+            local name cmd bin version
+            for name cmd in \
+                "Node.js" "node --version" \
+                "npm" "npm --version" \
+                "pnpm" "pnpm --version" \
+                "bun" "bun --version"; do
+                bin="${cmd%% *}"
+                if command -v "$bin" >/dev/null 2>&1; then
+                    version=$(eval "$cmd" 2>/dev/null)
+                    write_item "$name" "$version" "$GREEN" "$GRAY"
+                else
+                    write_item "$name" "Not installed" "$GRAY" "$GRAY"
+                fi
+            done
 
-    local max_len=0 key val
-    while IFS=$'\t' read -r key _; do
-        (( ${#key} > max_len )) && max_len=${#key}
-    done <<< "$scripts_output"
-    (( max_len < 10 )) && max_len=10
+            if [[ -f "package.json" ]]; then
+                write_header "Current Project"
+                local val
+                for field in name version description; do
+                    val=$(_pkg_field "$field")
+                    [[ -n "$val" ]] && write_item "$field" "$val" "$GREEN" "$GRAY"
+                done
+            fi
+            echo ""
+            ;;
+        scripts)
+            if [[ ! -f "package.json" ]]; then
+                printf "\n  ${RED}[!] package.json not found.${NC}\n"
+                return 1
+            fi
 
-    while IFS=$'\t' read -r key val; do
-        (( ${#val} > 60 )) && val="${val:0:57}..."
-        printf "  ${GREEN}%-${max_len}s${NC}  ${GRAY}%s${NC}\n" "$key" "$val"
-    done <<< "$scripts_output"
-    echo ""
+            local scripts_output
+            # Try gawk-compatible parser first, fall back to compat
+            scripts_output=$(_parse_scripts)
+            [[ -z "$scripts_output" ]] && scripts_output=$(_parse_scripts_compat)
+
+            if [[ -z "$scripts_output" ]]; then
+                printf "\n  ${YELLOW}[!] No scripts found in package.json.${NC}\n"
+                return
+            fi
+
+            write_header "Available Scripts"
+
+            local max_len=0 key val
+            while IFS=$'\t' read -r key _; do
+                (( ${#key} > max_len )) && max_len=${#key}
+            done <<< "$scripts_output"
+            (( max_len < 10 )) && max_len=10
+
+            while IFS=$'\t' read -r key val; do
+                (( ${#val} > 60 )) && val="${val:0:57}..."
+                printf "  ${GREEN}%-${max_len}s${NC}  ${GRAY}%s${NC}\n" "$key" "$val"
+            done <<< "$scripts_output"
+            echo ""
+            ;;
+        *)
+            echo "Acción no válida: $action"
+            return 1
+            ;;
+    esac
 }
+
+_nd_completion() {
+    local -a actions
+    actions=(clean check scripts)
+
+    if (( CURRENT == 2 )); then
+        compadd -a actions
+    fi
+}
+
+compdef _nd_completion nd
