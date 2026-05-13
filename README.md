@@ -1,244 +1,140 @@
-# 🧩 PowerShell Profile Modular — `pwsh-profile`
+# Personal System Config
 
-Este repositorio contiene una configuración modular para **PowerShell 7+**, diseñada para mantener tu entorno limpio, reutilizable y fácil de versionar.
+Configuracion personal versionada para Debian/i3/Zsh y PowerShell en Windows.
 
-La idea es **separar toda la lógica del perfil** (`Microsoft.PowerShell_profile.ps1`) en archivos organizados dentro de este proyecto, que el perfil solo carga automáticamente al iniciar PowerShell.
+El objetivo es mantener el entorno reproducible sin convertir el perfil de shell o la configuracion de i3 en archivos gigantes.
 
----
+## Estructura
 
-## Tabla de contenidos
-
-- [🧩 PowerShell Profile Modular — `pwsh-profile`](#-powershell-profile-modular--pwsh-profile)
-  - [Tabla de contenidos](#tabla-de-contenidos)
-  - [🚀 Objetivo](#-objetivo)
-  - [📁 Estructura de carpetas](#-estructura-de-carpetas)
-  - [⚙️ Instalación](#️-instalación)
-    - [1. Clonar el repositorio](#1-clonar-el-repositorio)
-    - [2. Editar tu perfil de PowerShell](#2-editar-tu-perfil-de-powershell)
-    - [3. (Solo la primera vez) permitir ejecución de scripts](#3-solo-la-primera-vez-permitir-ejecución-de-scripts)
-  - [🧠 ¿Qué hace cada módulo?](#-qué-hace-cada-módulo)
-    - [🧩 `init.ps1`](#-initps1)
-    - [⚙️ `utils.ps1`](#️-utilsps1)
-    - [📦 `size.ps1`](#-sizeps1)
-    - [📂 `navigation.ps1`](#-navigationps1)
-    - [🧰 `services.ps1`](#-servicesps1)
-    - [🧑‍💻 `node.ps1`](#-nodeps1)
-    - [📜 `help.ps1`](#-helpps1)
-    - [🪩 `banner.ps1`](#-bannerps1)
-  - [🔧 Cómo añadir más scripts](#-cómo-añadir-más-scripts)
-  - [🧩 Recomendaciones](#-recomendaciones)
-  - [🧭 Créditos y licencia](#-créditos-y-licencia)
-
----
-
-## 🚀 Objetivo
-
-* Mantener la configuración de la terminal **limpia y mantenible**.
-* Permitir **portar el entorno** fácilmente a otra PC (clonando el repo).
-* Evitar mezclar alias, funciones y módulos en un solo archivo gigante.
-* Cargar cada parte en orden lógico y controlado.
-
----
-
-## 📁 Estructura de carpetas
-
-```
-pwsh-profile/
-├─ bootstrap.ps1          # Script principal que carga todos los módulos
-├─ scripts/
-│  ├─ init.ps1            # Configuración base: oh-my-posh, fnm, PSReadLine, etc.
-│  ├─ utils.ps1           # Funciones utilitarias generales (Convert-Size, centrado de texto)
-│  ├─ size.ps1            # Funciones Get-Size y size (calcular tamaño de carpetas)
-│  ├─ navigation.ps1      # Atajos de rutas y comandos de navegación
-│  ├─ services.ps1        # Configuración de servicios y módulos (SSH agent, Terminal-Icons, etc.)
-│  ├─ node.ps1            # Comandos de desarrollo Node.js / pnpm / npm
-│  ├─ help.ps1            # Comando “commands” que lista todos tus alias y funciones
-│  └─ banner.ps1          # Banner ASCII mostrado al iniciar PowerShell
-└─ README.md              # Este archivo
+```text
+.
+├── deb/
+│   ├── init.zsh                 # Bootstrap principal de Zsh
+│   ├── setup.zsh                # Enlaces de configuracion para Debian
+│   ├── lib/                     # Modulos Zsh: navegacion, servicios, node, wine, etc.
+│   ├── i3/config                # Configuracion de i3wm
+│   ├── i3blocks/                # Barra de estado y scripts
+│   ├── ghostty/                 # Terminal Ghostty
+│   ├── rofi/                    # Tema de Rofi
+│   ├── thermal/                 # Servicio thermal-guard
+│   ├── terminal/.p10k.zsh       # Tema Powerlevel10k
+│   ├── X11/                     # Configuracion Xorg
+│   └── xfce4/                   # Power manager
+├── win-main.ps1                 # Bootstrap principal de PowerShell
+├── win/                         # Modulos PowerShell
+├── .env.example                 # Variables locales de ejemplo
+└── .gitignore
 ```
 
----
+## Instalacion En Debian
 
-## ⚙️ Instalación
+1. Clona o ubica el repo en `~/.config/config`.
+2. En tu `.zshrc`, carga el bootstrap:
 
-### 1. Clonar el repositorio
-
-Por defecto, se asume que estará en:
-
-```
-C:\Users\<tu_usuario>\core\dev\pwsh-profile
+```zsh
+source "$HOME/.config/config/deb/init.zsh"
 ```
 
-Si querés usar otra ruta, podés definir una variable de entorno:
+3. Aplica enlaces de configuracion:
+
+```sh
+~/.config/config/deb/setup.zsh
+```
+
+Puedes ejecutarlo con `sudo` si quieres enlazar tambien archivos de sistema como X11, systemd y thermal-guard. Los enlaces dentro de `$HOME` se crean como el usuario real.
+
+4. Si usas thermal-guard:
+
+```sh
+sudo systemctl enable --now thermal-guard.service
+```
+
+## Instalacion En Windows
+
+En tu perfil de PowerShell (`$PROFILE`), carga `win-main.ps1`:
 
 ```powershell
-[System.Environment]::SetEnvironmentVariable('PWSH_CONFIG_HOME', 'C:\Ruta\A\pwsh-profile', 'User')
-```
-
-### 2. Editar tu perfil de PowerShell
-
-Abrí tu perfil de usuario:
-
-```powershell
-notepad $PROFILE
-```
-
-Y pegá esto:
-
-```powershell
-# Perfil mínimo: carga el bootstrap del repo
 $ConfigHome = $env:PWSH_CONFIG_HOME
 if ([string]::IsNullOrWhiteSpace($ConfigHome)) {
-    $ConfigHome = Join-Path $HOME 'core\dev\pwsh-profile'
+    $ConfigHome = Join-Path $HOME '.config\config'
 }
 
-$Bootstrap = Join-Path $ConfigHome 'bootstrap.ps1'
-
+$Bootstrap = Join-Path $ConfigHome 'win-main.ps1'
 if (Test-Path $Bootstrap) {
     . $Bootstrap
 } else {
-    Write-Warning "No se encontró el bootstrap en: $Bootstrap"
+    Write-Warning "No se encontro: $Bootstrap"
 }
 ```
 
-Guarda y cierra.
+## Variables Locales
 
-### 3. (Solo la primera vez) permitir ejecución de scripts
+Copia `.env.example` a `.env` y ajusta valores privados o especificos de maquina.
 
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```sh
+cp .env.example .env
 ```
 
----
+`.env` no se versiona. Actualmente se usa para BitLocker y puede ampliarse para rutas o dispositivos locales.
 
-## 🧠 ¿Qué hace cada módulo?
+Variables utiles para thermal-guard:
 
-### 🧩 `init.ps1`
-
-Carga configuraciones iniciales:
-
-* `CompletionPredictor` para autocompletado predictivo.
-* `fnm` (Fast Node Manager) para manejo automático de versiones de Node.js.
-* `oh-my-posh` con tema personalizado (`froczh.omp.json`).
-* Configuración de `PSReadLine` para predicción desde historial.
-* Alias `pg` → `pgcli` si está disponible.
-
-### ⚙️ `utils.ps1`
-
-Funciones auxiliares que otros módulos usan:
-
-* `Convert-Size`: convierte bytes en KB, MB, GB, TB con formato.
-* `Write-HostCentered`: centra texto en la consola (usado en el banner).
-
-### 📦 `size.ps1`
-
-Permite calcular el tamaño de carpetas y archivos.
-
-Comandos:
-
-* `Get-Size [ruta]`: devuelve objeto con tamaño, archivos y carpetas.
-* `size [ruta]`: muestra una vista colorida y legible.
-
-Admite rutas **relativas o absolutas**.
-Si no se pasa argumento, usa la carpeta actual (`.`).
-
-### 📂 `navigation.ps1`
-
-Funciones de navegación rápida:
-
-| Comando                               | Descripción                                            |
-| ------------------------------------- | ------------------------------------------------------ |
-| `e`                                   | Abre el explorador de archivos en el directorio actual |
-| `c`                                   | Abre VS Code (por defecto en el directorio actual)     |
-| `core`, `dev`, `uni`, `work`, `learn` | Atajos a carpetas definidas en `$script:QuickPaths`    |
-
-### 🧰 `services.ps1`
-
-Comandos del sistema:
-
-* `essh`: habilita y arranca el servicio `ssh-agent`.
-* `ti`: carga el módulo `Terminal-Icons` con feedback visual.
-* `sexo`: abre CornHub (un easter egg 🌽).
-
-### 🧑‍💻 `node.ps1`
-
-Herramientas para desarrollo con Node.js:
-
-| Comando  | Acción                                                                |
-| -------- | --------------------------------------------------------------------- |
-| `ndev`   | Inicia el servidor de desarrollo (`node --run dev`)                   |
-| `nbuild` | Compila el proyecto                                                   |
-| `nstart` | Arranca el servidor de producción                                     |
-| `nclean` | Elimina `node_modules` y archivos de lock                             |
-| `ncheck` | Muestra versiones de Node, npm, pnpm y detalles del proyecto          |
-| `ninit`  | Inicializa un nuevo proyecto con `pnpm init`                          |
-| `sdev`   | Abre VS Code, arranca el servidor y abre el navegador automáticamente |
-
-
-
-### 📜 `help.ps1`
-
-Define el comando:
-
-```powershell
-commands
+```sh
+THERMAL_GUARD_CPU_PKG_TEMP=/sys/class/hwmon/hwmonX/tempY_input
+THERMAL_GUARD_CPU_ACPI_TEMP=/sys/class/hwmon/hwmonX/tempY_input
+THERMAL_GUARD_TMEM_TEMP=/sys/class/hwmon/hwmonX/tempY_input
 ```
 
-Muestra todos los comandos personalizados clasificados por categoría.
+Si no se definen, `thermal-guard` intenta autodetectar sensores por etiqueta `hwmon` y luego usa los paths historicos como fallback.
 
+## Comandos Principales
 
+Zsh:
 
-### 🪩 `banner.ps1`
+```text
+help_config     Lista comandos personalizados
+core/dev/work   Navegacion rapida
+c/dps/e/r       Abrir VS Code, Ghostty, Thunar o ranger
+nd check        Versiones de Node/npm/pnpm/bun
+nd scripts      Scripts disponibles en package.json
+nd clean        Limpia node_modules y lockfiles
+size            Tamano de archivo/directorio
+svc             Administra servicios frecuentes
+essh            Inicia ssh-agent
+phone           Abre Android conectado con scrcpy
+mount-win       Monta particion BitLocker en modo lectura
+createwine      Crea perfil Wine e init.sh
+removewine      Elimina perfil Wine
+```
 
-Muestra tu banner ASCII centrado con tu nombre o logo al abrir PowerShell.
+PowerShell:
 
+```text
+commands        Lista comandos personalizados
+core/dev/work   Navegacion rapida
+c/dps/e         VS Code, Windows Terminal, File Pilot
+ncheck          Versiones de Node/npm/pnpm/bun
+nscripts        Scripts disponibles en package.json
+size            Tamano de archivo/directorio
+essh            Inicia ssh-agent
+ti              Carga Terminal-Icons
+o/oc            Opencode
+```
 
+## Validacion
 
-## 🔧 Cómo añadir más scripts
+Comandos utiles antes de commitear cambios:
 
-1. Crea un nuevo archivo `.ps1` dentro de `scripts/`.
-   Ejemplo:
+```sh
+zsh -n deb/init.zsh deb/lib/*.zsh
+bash -n deb/setup.zsh deb/i3blocks/scripts/*.sh deb/thermal/thermal-guard.sh
+i3 -C -c deb/i3/config
+```
 
-   ```
-   scripts/git.ps1
-   ```
+Si tienes `shellcheck`, tambien conviene ejecutarlo sobre los scripts `.sh`.
 
-2. Escribe tus funciones o alias dentro de ese archivo.
-   Ejemplo:
+## Notas
 
-   ```powershell
-   function gstat { git status }
-   function gpush { git add .; git commit -m "update"; git push }
-   ```
-
-3. Abre `bootstrap.ps1` y **añade el nombre del archivo** en la lista `$scriptOrder`:
-
-   ```powershell
-   $scriptOrder = @(
-       'init.ps1',
-       'utils.ps1',
-       'size.ps1',
-       'navigation.ps1',
-       'services.ps1',
-       'node.ps1',
-       'git.ps1',      # <── Nuevo script
-       'help.ps1',
-       'banner.ps1'
-   )
-   ```
-
-4. Guarda los cambios y reinicia PowerShell.
-   Tu script se cargará automáticamente al inicio.
-
-## 🧩 Recomendaciones
-
-* Guardá este repo en GitHub o GitLab para tener tu entorno siempre disponible.
-* Podés mantener ramas separadas para configuraciones distintas (trabajo, personal, laptop, etc.).
-* Si agregás scripts complejos, considerá agruparlos como módulos (`.psm1`).
-* Podés personalizar `Show-Name` en `banner.ps1` para mostrar otro texto o arte ASCII.
-
-## 🧭 Créditos y licencia
-
-Creado para uso personal por **MauricioDMO**.
-Inspirado en prácticas comunes de *dotfiles* y entornos de desarrollo profesional.
-Licencia: MIT (libre de uso y modificación).
+- i3 alterna teclado solo con `Mod+Space`; no se configura un atajo extra de XKB.
+- Varias rutas siguen siendo personales (`~/core`, fondos, lockscreen). Ajustalas si migras de maquina.
+- Los scripts de hardware incluyen fallbacks, pero la tableta grafica y algunos perifericos siguen dependiendo de nombres concretos de dispositivo.

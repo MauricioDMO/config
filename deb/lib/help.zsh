@@ -23,19 +23,25 @@ help_config() {
         "uni|Ir a ~/core/university" \
         "work|Ir a ~/core/work" \
         "learn|Ir a ~/core/learn" \
-        "oc|Abrir VS Code aquí (code .)"
+        "c|Abrir VS Code aquí o en una ruta" \
+        "dps|Abrir Ghostty en una ruta" \
+        "e|Abrir Thunar en una ruta" \
+        "r|Abrir ranger y volver al directorio elegido"
 
     _help_section "Package Management" \
-        "nclean|Limpiar node_modules y locks" \
-        "ncheck|Ver versiones de Node/npm/etc" \
-        "nscripts|Listar scripts de npm disponibles"
+        "nd clean|Limpiar node_modules y locks" \
+        "nd check|Ver versiones de Node/npm/etc" \
+        "nd scripts|Listar scripts de npm disponibles"
 
     _help_section "System" \
         "size|Ver tamaño de directorio/archivo detallado" \
         "essh|Habilitar/Iniciar SSH Agent" \
+        "svc|Administrar servicios frecuentes" \
         "lock-laptop|Bloquear laptop con i3lock e imagen aleatoria" \
         "mount-win|Montar partición Windows (BitLocker)" \
-        "umount-win|Desmontar partición Windows"
+        "umount-win|Desmontar partición Windows" \
+        "apt-uninstall|Purgar paquete apt y dependencias" \
+        "phone|Abrir Android conectado con scrcpy"
 
     _help_section "Graphic Tablet" \
         "tablet_setup [OUTPUT]|Aplica setup completo de tableta (acepta salida o desktop)" \

@@ -24,6 +24,8 @@ function commands {
         @{ Cat = "System"; Cmd = "ti"; Desc = "Load Terminal-Icons module" }
         @{ Cat = "System"; Cmd = "essh"; Desc = "Enable SSH Agent" }
         @{ Cat = "System"; Cmd = "size"; Desc = "Shows the size of the dir" }
+        @{ Cat = "System"; Cmd = "o"; Desc = "Open opencode" }
+        @{ Cat = "System"; Cmd = "oc"; Desc = "Open opencode with -c" }
         @{ Cat = "System"; Cmd = "sexo"; Desc = "A funny command..." }
     )
 
