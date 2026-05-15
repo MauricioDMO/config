@@ -84,8 +84,8 @@ bindsym Print exec flameshot gui
 bindsym $mod+Shift+s exec flameshot gui
 
 # --- Idioma del Teclado ---
-# Alternar entre US y Latam solo con Mod+Espacio
-bindsym $mod+Space exec --no-startup-id sh -c 'layout=$(setxkbmap -query | awk "/layout:/ {print \$2}"); case "$layout" in us*) setxkbmap latam ;; *) setxkbmap us ;; esac'
+# Alternar entre US y Latam con Mod+Espacio mediante XKB.
+# No usar bindsym aquí: i3 captura Mod+space antes de que XKB pueda alternar el layout.
 
 # ------------------------------------------------------------------------------
 # 5. NAVEGACIÓN DE VENTANAS (Foco)
@@ -275,5 +275,5 @@ exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchp
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Scroll Method Enabled" 1 0 0 2>/dev/null || true'
 exec_always --no-startup-id sh -c 'xinput set-prop "PS/2 Generic Mouse" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
 
-# Forzar layout inicial sin atajos extra de XKB; el cambio queda solo en Mod+Espacio.
-exec_always --no-startup-id setxkbmap us
+# Forzar layouts y atajo de cambio de idioma con Mod+Espacio.
+exec_always --no-startup-id setxkbmap -layout "us,latam" -option "grp:win_space_toggle"
