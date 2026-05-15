@@ -31,7 +31,8 @@ help_config() {
     _help_section "Package Management" \
         "nd clean|Limpiar node_modules y locks" \
         "nd check|Ver versiones de Node/npm/etc" \
-        "nd scripts|Listar scripts de npm disponibles"
+        "nd scripts|Listar scripts de npm disponibles" \
+        "nd pkg|Listar dependencies y devDependencies con versiones"
 
     _help_section "System" \
         "size|Ver tamaño de directorio/archivo detallado" \
