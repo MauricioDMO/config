@@ -49,8 +49,15 @@ help_config() {
         "tablet_focus [OUTPUT]|Selecciona mapeo por numero (0=desktop, 1..N=pantalla)"
 
     _help_section "Wine" \
-        "createwine [--init-only]|Asistente para crear perfil o solo init.sh" \
-        "cwine|Alias corto de createwine"
+        "wn list|Listar perfiles en ~/wineprefixes" \
+        "wn create <perfil> [exe]|Crear perfil win64 e init.sh autodetectado" \
+        "wn init <perfil> [exe]|Crear/regenerar init.sh autodetectado" \
+        "wn info [init.sh]|Ver prefix, exe, tipo y flags" \
+        "wn run <perfil> <exe>|Ejecutar programa con un perfil" \
+        "wn cfg <perfil>|Abrir winecfg del perfil" \
+        "wn tricks <perfil> <paquetes>|Instalar winetricks en el perfil" \
+        "wn remove <perfil>|Eliminar perfil Wine" \
+        "deb/Docs/wn.md|Documentación completa de wn"
 
     echo ""
 }
