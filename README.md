@@ -20,6 +20,7 @@ El objetivo es mantener el entorno reproducible sin convertir el perfil de shell
 │   ├── terminal/.p10k.zsh       # Tema Powerlevel10k
 │   ├── X11/                     # Configuracion Xorg
 │   └── xfce4/                   # Power manager
+├── opencode/                    # Configuracion versionable de opencode
 ├── win-main.ps1                 # Bootstrap principal de PowerShell
 ├── win/                         # Modulos PowerShell
 ├── .env.example                 # Variables locales de ejemplo
@@ -76,6 +77,8 @@ cp .env.example .env
 ```
 
 `.env` no se versiona. Actualmente se usa para BitLocker y puede ampliarse para rutas o dispositivos locales.
+
+La configuracion de opencode vive en `opencode/` y se enlaza hacia `~/.config/opencode`. Solo se versionan archivos editables como `opencode.json` y `commands/`; dependencias locales como `node_modules`, `package.json` y lockfiles quedan fuera del repo.
 
 Variables utiles para thermal-guard:
 

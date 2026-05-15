@@ -58,6 +58,11 @@ as_user mkdir -p "$TARGET_HOME/.config/ghostty"
 as_user ln -sfn "$REPO_DIR/deb/ghostty/config" "$TARGET_HOME/.config/ghostty/config"
 as_user ln -sfn "$REPO_DIR/deb/ghostty/themes" "$TARGET_HOME/.config/ghostty/themes"
 
+# Enlazar configuracion versionable de opencode sin tocar dependencias locales
+as_user mkdir -p "$TARGET_HOME/.config/opencode"
+as_user ln -sfn "$REPO_DIR/opencode/opencode.json" "$TARGET_HOME/.config/opencode/opencode.json"
+as_user ln -sfn "$REPO_DIR/opencode/commands" "$TARGET_HOME/.config/opencode/commands"
+
 # Enlazar configuraciones de X11 a la carpeta de configuración del sistema
 as_root mkdir -p /etc/X11/xorg.conf.d
 as_root ln -sfn "$REPO_DIR/deb/X11/70-synaptics.conf" /etc/X11/xorg.conf.d/70-synaptics.conf
