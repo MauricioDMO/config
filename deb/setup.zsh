@@ -38,6 +38,8 @@ as_user() {
 # Enlazar configuraciones de i3 y i3status a la carpeta de configuración del usuario
 as_user mkdir -p "$TARGET_HOME/.config/i3"
 as_user ln -sfn "$REPO_DIR/deb/i3/config" "$TARGET_HOME/.config/i3/config"
+as_user ln -sfn "$REPO_DIR/deb/i3/scripts" "$TARGET_HOME/.config/i3/scripts"
+chmod +x "$REPO_DIR"/deb/i3/scripts/*.sh
 
 # Migracion a i3blocks
 # ln -sfn ~/.config/config/deb/i3status/config ~/.config/i3status/config
