@@ -31,7 +31,7 @@ bindsym $mod+d exec rofi -show drun -theme ~/.config/config/deb/rofi/theme.rasi
 bindsym $mod+Shift+d exec rofi -show window -theme ~/.config/config/deb/rofi/theme.rasi
 
 # Navegador Web (Brave)
-bindsym $mod+Shift+Return exec brave-origin-beta
+bindsym $mod+Shift+Return exec brave-origin-nightly
 
 # Editor de Código (VS Code)
 bindsym $mod+c exec code
@@ -269,11 +269,11 @@ exec_always --no-startup-id sh -c '[ -x "$HOME/.screenlayout/dock.sh" ] && "$HOM
 # Con delay solo en primer login
 exec_always --no-startup-id sh -c 'bg_dir="$HOME/core/config/bg"; [ -d "$bg_dir" ] || exit 0; if [ ! -f /tmp/i3-startup-bg ]; then sleep 1.5; touch /tmp/i3-startup-bg; fi; img=$(find "$bg_dir" -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
 
-# Configuración de periféricos (Scroll natural para Touchpad y Mouse)
+# Configuración de periféricos (scroll natural solo para Touchpad)
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Tapping Enabled" 1 >/dev/null || true'
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Scroll Method Enabled" 1 0 0 2>/dev/null || true'
-exec_always --no-startup-id sh -c 'xinput set-prop "PS/2 Generic Mouse" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
+exec_always --no-startup-id sh -c 'xinput set-prop "PS/2 Generic Mouse" "libinput Natural Scrolling Enabled" 0 2>/dev/null || true'
 
 # Forzar layouts y atajo de cambio de idioma con Mod+Espacio.
 exec_always --no-startup-id setxkbmap -layout "us,latam" -option "grp:win_space_toggle"
