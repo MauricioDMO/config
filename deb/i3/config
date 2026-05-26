@@ -25,10 +25,10 @@ font pango:JetBrains Mono 10
 bindsym $mod+Return exec ghostty
 
 # Menú de aplicaciones (Rofi)
-bindsym $mod+d exec rofi -show drun -theme ~/.config/config/deb/rofi/theme.rasi
+bindsym $mod+g exec rofi -show drun -theme ~/.config/config/deb/rofi/theme.rasi
 
 # Selector de ventanas (Rofi)
-bindsym $mod+Shift+d exec rofi -show window -theme ~/.config/config/deb/rofi/theme.rasi
+bindsym $mod+Shift+g exec rofi -show window -theme ~/.config/config/deb/rofi/theme.rasi
 
 # Navegador Web (Brave)
 bindsym $mod+Shift+Return exec brave-origin-nightly
@@ -90,6 +90,14 @@ bindsym $mod+Shift+s exec flameshot gui
 # --- Idioma del Teclado ---
 # Alternar entre US y Latam con Mod+Espacio mediante XKB.
 # No usar bindsym aquí: i3 captura Mod+space antes de que XKB pueda alternar el layout.
+
+# --- Teclas rotas ---
+# Alternativas para escribir d, e y 3 cuando el teclado físico falla.
+bindsym --release $mod+u exec --no-startup-id xdotool type --clearmodifiers d
+bindsym --release $mod+i exec --no-startup-id xdotool type --clearmodifiers e
+bindsym --release $mod+9 exec --no-startup-id xdotool type --clearmodifiers 3
+bindsym --release $mod+Shift+u exec --no-startup-id xdotool type --clearmodifiers D
+bindsym --release $mod+Shift+i exec --no-startup-id xdotool type --clearmodifiers E
 
 # ------------------------------------------------------------------------------
 # 5. NAVEGACIÓN DE VENTANAS (Foco)
@@ -170,6 +178,14 @@ bindsym $mod+4 workspace $ws4
 bindsym $mod+5 workspace $ws5
 bindsym $mod+6 workspace $ws6
 
+# Cambiar al workspace con numpad. bindcode evita problemas con NumLock/layout.
+bindcode $mod+87 workspace $ws1
+bindcode $mod+88 workspace $ws2
+bindcode $mod+89 workspace $ws3
+bindcode $mod+83 workspace $ws4
+bindcode $mod+84 workspace $ws5
+bindcode $mod+85 workspace $ws6
+
 # Mover ventana al workspace (Mod + Shift + Número)
 bindsym $mod+Shift+1 move container to workspace $ws1
 bindsym $mod+Shift+2 move container to workspace $ws2
@@ -178,6 +194,14 @@ bindsym $mod+Shift+4 move container to workspace $ws4
 bindsym $mod+Shift+5 move container to workspace $ws5
 bindsym $mod+Shift+6 move container to workspace $ws6
 
+# Mover ventana al workspace con numpad
+bindcode $mod+Shift+87 move container to workspace $ws1
+bindcode $mod+Shift+88 move container to workspace $ws2
+bindcode $mod+Shift+89 move container to workspace $ws3
+bindcode $mod+Shift+83 move container to workspace $ws4
+bindcode $mod+Shift+84 move container to workspace $ws5
+bindcode $mod+Shift+85 move container to workspace $ws6
+
 # Mover el workspace actual completo a otro número (Renombrar)
 bindsym $mod+Ctrl+1 rename workspace to $ws1
 bindsym $mod+Ctrl+2 rename workspace to $ws2
@@ -185,6 +209,14 @@ bindsym $mod+Ctrl+3 rename workspace to $ws3
 bindsym $mod+Ctrl+4 rename workspace to $ws4
 bindsym $mod+Ctrl+5 rename workspace to $ws5
 bindsym $mod+Ctrl+6 rename workspace to $ws6
+
+# Renombrar workspace con numpad
+bindcode $mod+Ctrl+87 rename workspace to $ws1
+bindcode $mod+Ctrl+88 rename workspace to $ws2
+bindcode $mod+Ctrl+89 rename workspace to $ws3
+bindcode $mod+Ctrl+83 rename workspace to $ws4
+bindcode $mod+Ctrl+84 rename workspace to $ws5
+bindcode $mod+Ctrl+85 rename workspace to $ws6
 
 # Alternar entre workspace actual y el anterior
 bindsym $mod+Tab workspace back_and_forth
