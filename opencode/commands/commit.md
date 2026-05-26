@@ -1,5 +1,6 @@
 ---
 description: Create clean Conventional Commits from current Git changes
+agent: commit-writer
 ---
 
 # Git Commit Organizer
