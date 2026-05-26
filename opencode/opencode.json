@@ -1,5 +1,13 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "commit-writer": {
+      "model": "minimax-coding-plan/MiniMax-M2.7",
+      "mode": "subagent",
+      "description": "Creates clean Conventional Commits from current Git changes.",
+      "prompt": "You are the dedicated agent for the /commit command. Follow the command instructions exactly, inspect git state carefully, stage only intentional changes, and create clean Conventional Commits."
+    }
+  },
   "mcp": {
     "chrome-devtools": {
       "type": "local",
