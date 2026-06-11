@@ -36,6 +36,9 @@ bindsym $mod+Shift+Return exec brave-origin-nightly
 # Editor de Código (VS Code)
 bindsym $mod+c exec code
 
+# Administrador de archivos (Dolphin)
+bindsym $mod+x exec --no-startup-id dolphin
+
 # Administrador de tareas
 bindsym $mod+Shift+Escape exec --no-startup-id /usr/bin/flatpak run io.missioncenter.MissionCenter
 
@@ -88,8 +91,9 @@ bindsym Print exec flameshot gui
 bindsym $mod+Shift+s exec flameshot gui
 
 # --- Idioma del Teclado ---
-# Alternar entre US y Latam con Mod+Espacio mediante XKB.
-# No usar bindsym aquí: i3 captura Mod+space antes de que XKB pueda alternar el layout.
+# Alternar entre US y Latam con Mod+Espacio. bindcode usa el keycode fijo de Space,
+# para que siga funcionando aunque el teclado USB se reconecte con otro layout.
+bindcode $mod+65 exec --no-startup-id ~/.config/i3/scripts/toggle-keyboard-layout.sh
 
 # --- Teclas rotas ---
 # Alternativas para escribir d, e y 3 cuando el teclado físico falla.
