@@ -12,12 +12,12 @@ case "${BLOCK_BUTTON:-0}" in
         ;;
     4)
         pactl set-sink-mute @DEFAULT_SINK@ 0 >/dev/null 2>&1
-        pactl set-sink-volume @DEFAULT_SINK@ +2% >/dev/null 2>&1
+        pactl set-sink-volume @DEFAULT_SINK@ -2% >/dev/null 2>&1
         refresh
         ;;
     5)
         pactl set-sink-mute @DEFAULT_SINK@ 0 >/dev/null 2>&1
-        pactl set-sink-volume @DEFAULT_SINK@ -2% >/dev/null 2>&1
+        pactl set-sink-volume @DEFAULT_SINK@ +2% >/dev/null 2>&1
         refresh
         ;;
 esac
