@@ -3,9 +3,9 @@ description: Create clean Conventional Commits from current Git changes
 agent: commit-writer
 ---
 
-# Git Commit Organizer
+# Fast Git Commit Organizer
 
-Create clean, reviewable Conventional Commits from the current uncommitted Git changes.
+Create clean, reviewable Conventional Commits from current Git changes with minimal tool calls.
 
 Optional user context:
 
@@ -22,6 +22,7 @@ Use that context as guidance for intent, grouping, exclusions, or message prefer
 - Each commit should leave the project in a coherent state when practical.
 - Commit automatically when the grouping is clear.
 - Ask only when there is meaningful ambiguity or safety risk.
+- Do not use tools other than git commands needed for this task.
 
 ## Commit Messages
 
@@ -46,24 +47,22 @@ Avoid:
 - `changes`
 - `wip`
 
-## Fast Inspection Workflow
+## Fast Workflow
 
-Start with cheap commands:
+Run this once at the start:
 
 ```bash
 git status --short
 git diff --stat
 git diff --name-status
-git diff --cached --stat
-git diff --cached --name-status
 git log --oneline -8
 ```
 
-Use full diffs selectively:
+Then decide groups from those summaries. Use full diffs only when needed:
 
-- Read `git diff -- <path>` only for files or groups needed to understand intent.
-- Read `git diff --cached -- <path>` only for staged content you are about to commit.
-- Avoid dumping the entire repository diff unless the change set is small or grouping cannot be understood otherwise.
+- Use `git diff -- <path>` only for files needed to understand intent.
+- Use `git diff --cached -- <path>` only before a commit when staged content is unclear.
+- Avoid dumping the whole diff unless the change set is small or grouping cannot be understood otherwise.
 
 The actual diff is the source of truth. Do not decide groups from filenames alone.
 
@@ -93,17 +92,17 @@ Dependency additions, removals, or version changes normally get their own `chore
 For each clear group:
 
 1. Stage only the exact files that belong to that commit.
-2. If one file contains multiple intentions, split only when it is safe and can be done non-interactively.
-3. Verify staged content before committing:
+2. If one file contains multiple intentions, split only when safe and non-interactive.
+3. Verify staged content cheaply:
 
 ```bash
 git diff --cached --stat
 git diff --cached --name-status
-git diff --cached -- <relevant-paths>
 ```
 
-4. Create the commit with the chosen Conventional Commit message.
-5. Continue until all clear groups are committed.
+4. Use `git diff --cached -- <path>` only if the staged summary is not enough.
+5. Create the commit with the chosen Conventional Commit message.
+6. Continue until all clear groups are committed.
 
 Prefer non-interactive staging commands such as:
 
@@ -141,16 +140,20 @@ Ask a concise question only when:
 
 ## Final Output
 
-After finishing, show:
+You MUST return a final message. Never finish with an empty response.
+
+After finishing, always run and show:
 
 ```bash
 git status --short
-git log --oneline -n <number_of_new_commits>
+git log --oneline -n <max(1, number_of_new_commits)>
 ```
 
-Then summarize:
+Then summarize using this exact structure, even when no commits were created:
 
-- commits created
-- files left uncommitted
-- files intentionally excluded
-- suspicious or ambiguous changes noticed
+- `Commits created:` list each new commit hash and subject, or `None`
+- `Files left uncommitted:` list paths, or `None`
+- `Files intentionally excluded:` list paths and reason, or `None`
+- `Suspicious or ambiguous changes noticed:` list paths and concern, or `None`
+
+If no commit was created, explicitly state why, for example: no changes, only ambiguous changes, suspicious files excluded, or commit failed with the observed error.
