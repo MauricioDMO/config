@@ -51,7 +51,7 @@ Avoid:
 
 ## Fast Workflow
 
-Run this once at the start:
+Run this once at the start as a single tool call:
 
 ```bash
 git status --short
@@ -59,6 +59,8 @@ git diff --stat
 git diff --name-status
 git log --oneline -8
 ```
+
+When commands are listed together in one code block, run them together in one `bash` tool call to reduce overhead. Split them only if one command fails or extra inspection is needed.
 
 Then decide groups from those summaries. Use full diffs only when needed:
 
@@ -95,7 +97,7 @@ For each clear group:
 
 1. Stage only the exact files that belong to that commit.
 2. If one file contains multiple intentions, split only when safe and non-interactive.
-3. Verify staged content cheaply:
+3. Verify staged content cheaply with a single tool call:
 
 ```bash
 git diff --cached --stat
@@ -144,7 +146,7 @@ Ask a concise question only when:
 
 You MUST return a final message. Never finish with an empty response.
 
-After finishing, always run and show:
+After finishing, always run and show with a single tool call:
 
 ```bash
 git status --short

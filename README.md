@@ -98,7 +98,7 @@ Zsh:
 ```text
 help_config     Lista comandos personalizados
 core/dev/work   Navegacion rapida
-c/dps/e/r       Abrir VS Code, Kitty, Thunar o ranger
+c/dps/e/r       Abrir VS Code, Kitty, archivos o ranger
 nd check        Versiones de Node/npm/pnpm/bun
 nd scripts      Scripts disponibles en package.json
 nd clean        Limpia node_modules y lockfiles
