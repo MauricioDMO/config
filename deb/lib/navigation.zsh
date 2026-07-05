@@ -64,8 +64,8 @@ dps() {
     CONFIG_HIDE_BANNER=1 kitty --listen-on unix:/tmp/kitty-mauriciodmo --directory "$full_path" >/dev/null 2>&1 &!
 }
 
-# Abre gestor de archivos (thunar) en la ruta especificada
-e() { thunar "${1:-.}" >/dev/null 2>&1 &!; }
+# Abre la ruta con el gestor de archivos predeterminado
+e() { xdg-open "${1:-.}" >/dev/null 2>&1 &!; }
 
 # Abre ranger y cambia al directorio al salir
 r() {
