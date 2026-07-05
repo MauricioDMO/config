@@ -36,6 +36,9 @@ bindsym $mod+Shift+Return exec brave-origin-nightly
 # Editor de Código (VS Code)
 bindsym $mod+c exec code
 
+# Notas (Obsidian)
+bindsym $mod+q exec --no-startup-id obsidian
+
 # Administrador de archivos (Dolphin)
 bindsym $mod+x exec --no-startup-id dolphin
 
