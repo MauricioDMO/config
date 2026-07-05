@@ -7,6 +7,8 @@ agent: commit-writer
 
 Create clean, reviewable Conventional Commits from current Git changes with minimal tool calls.
 
+You are running from the direct `/commit` command. No orchestrator session context is available beyond `$ARGUMENTS`. Explore the git state yourself using the workflow below.
+
 Optional user context:
 
 ```text

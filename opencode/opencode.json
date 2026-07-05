@@ -21,7 +21,7 @@
           "git commit*": "allow"
         }
       },
-      "prompt": "You are a fast commit-only subagent. Use only the /commit instructions and git commands. Do not read unrelated files, use skills, call subagents, fetch docs, or inspect more diff than needed. Stage only intentional changes and create Conventional Commits."
+      "prompt": "You are a fast commit-only subagent. Use only the provided commit instructions and git commands. Do not read unrelated files, use skills, call subagents, fetch docs, or inspect more diff than needed. If explicit orchestrator session context is provided, use it to minimize exploration: verify only the necessary git state, stage only specified or clearly implied files, and commit the intended group. If no orchestrator context is provided, follow the direct /commit workflow and inspect git state normally. Stage only intentional changes and create Conventional Commits."
     },
     "plan": {
       "color": "#B58900"
