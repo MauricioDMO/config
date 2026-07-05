@@ -17,4 +17,10 @@ case "$focused_class" in
     ;;
 esac
 
+"$KITTEN" @ --to "$KITTY_SOCKET" launch \
+  --type=os-window \
+  --cwd "$HOME" \
+  --env CONFIG_HIDE_BANNER= \
+  --no-response >/dev/null 2>&1 && exit 0
+
 exec "$KITTY" --listen-on "$KITTY_SOCKET"

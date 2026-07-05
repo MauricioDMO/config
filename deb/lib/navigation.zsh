@@ -57,6 +57,10 @@ c() { code "${1:-.}" >/dev/null 2>&1; }
 dps() {
     local full_path
     full_path="$(cd "${1:-.}" 2>/dev/null && pwd)" || full_path="${1:-.}"
+    if kitten @ --to unix:/tmp/kitty-mauriciodmo launch --type=os-window --cwd "$full_path" --env CONFIG_HIDE_BANNER=1 --no-response >/dev/null 2>&1; then
+        return
+    fi
+
     CONFIG_HIDE_BANNER=1 kitty --listen-on unix:/tmp/kitty-mauriciodmo --directory "$full_path" >/dev/null 2>&1 &!
 }
 
