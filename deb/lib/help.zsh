@@ -24,7 +24,7 @@ help_config() {
         "work|Ir a ~/core/work" \
         "learn|Ir a ~/core/learn" \
         "c|Abrir VS Code aquí o en una ruta" \
-        "dps|Abrir Ghostty en una ruta" \
+        "dps|Abrir Kitty en una ruta" \
         "e|Abrir Thunar en una ruta" \
         "r|Abrir ranger y volver al directorio elegido"
 

@@ -21,8 +21,8 @@ font pango:JetBrains Mono 10
 # ------------------------------------------------------------------------------
 # 2. APLICACIONES Y LANZADORES
 # ------------------------------------------------------------------------------
-# Terminal (Ghostty)
-bindsym $mod+Return exec ghostty
+# Terminal (Kitty)
+bindsym $mod+Return exec --no-startup-id ~/.config/i3/scripts/open-terminal-here.sh
 
 # Menú de aplicaciones (Rofi)
 bindsym $mod+g exec rofi -show drun -theme ~/.config/config/deb/rofi/theme.rasi
@@ -243,8 +243,8 @@ bindsym $mod+Control+o move workspace to output next
 # ------------------------------------------------------------------------------
 # Forzar bordes para que se vea el foco
 
-# Ghostty
-for_window [class="ghostty"] border pixel 2
+# Kitty
+for_window [class="kitty"] border pixel 2
 # VS Code
 for_window [class="code"] border pixel 2
 

@@ -14,6 +14,7 @@ El objetivo es mantener el entorno reproducible sin convertir el perfil de shell
 │   ├── lib/                     # Modulos Zsh: navegacion, servicios, node, wine, etc.
 │   ├── i3/config                # Configuracion de i3wm
 │   ├── i3blocks/                # Barra de estado y scripts
+│   ├── kitty/                   # Terminal Kitty
 │   ├── ghostty/                 # Terminal Ghostty
 │   ├── rofi/                    # Tema de Rofi
 │   ├── thermal/                 # Servicio thermal-guard
@@ -97,7 +98,7 @@ Zsh:
 ```text
 help_config     Lista comandos personalizados
 core/dev/work   Navegacion rapida
-c/dps/e/r       Abrir VS Code, Ghostty, Thunar o ranger
+c/dps/e/r       Abrir VS Code, Kitty, Thunar o ranger
 nd check        Versiones de Node/npm/pnpm/bun
 nd scripts      Scripts disponibles en package.json
 nd clean        Limpia node_modules y lockfiles

@@ -34,5 +34,5 @@ show_name() {
     echo ""
 }
 
-# Show banner only if shell is interactive
-[[ -o interactive ]] && show_name
+# Show banner only if shell is interactive and not explicitly suppressed
+[[ -o interactive && -z "$CONFIG_HIDE_BANNER" ]] && show_name

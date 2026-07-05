@@ -60,6 +60,10 @@ as_user mkdir -p "$TARGET_HOME/.config/ghostty"
 as_user ln -sfn "$REPO_DIR/deb/ghostty/config" "$TARGET_HOME/.config/ghostty/config"
 as_user ln -sfn "$REPO_DIR/deb/ghostty/themes" "$TARGET_HOME/.config/ghostty/themes"
 
+# Enlazar configuraciones de Kitty a la carpeta de configuración del usuario
+as_user mkdir -p "$TARGET_HOME/.config/kitty"
+as_user ln -sfn "$REPO_DIR/deb/kitty/kitty.conf" "$TARGET_HOME/.config/kitty/kitty.conf"
+
 # Enlazar configuracion versionable de opencode sin tocar dependencias locales
 as_user mkdir -p "$TARGET_HOME/.config/opencode"
 as_user ln -sfn "$REPO_DIR/opencode/opencode.json" "$TARGET_HOME/.config/opencode/opencode.json"
