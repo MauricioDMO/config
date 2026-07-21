@@ -50,5 +50,8 @@
       ],
       "enabled": true
     }
-  }
+  },
+  "plugin": [
+    "@dietrichgebert/ponytail"
+  ]
 }
