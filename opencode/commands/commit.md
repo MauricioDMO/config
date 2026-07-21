@@ -7,7 +7,7 @@ agent: commit-writer
 
 Create clean, reviewable Conventional Commits from current Git changes with minimal tool calls.
 
-You are running from the direct `/commit` command. No orchestrator session context is available beyond `$ARGUMENTS`. Explore the git state yourself using the workflow below.
+You are running from the direct `/commit` command. No orchestrator session context is available beyond `$ARGUMENTS`. The initial Git snapshot below is injected before you start; do not repeat it unless more inspection is needed.
 
 Optional user context:
 
@@ -49,18 +49,15 @@ Avoid:
 - `changes`
 - `wip`
 
-## Fast Workflow
+## Initial Git Snapshot
 
-Run this once at the start as a single tool call:
+This snapshot is injected before you start. Output order: status, diff stat, name-status, recent log.
 
-```bash
-git status --short
-git diff --stat
-git diff --name-status
-git log --oneline -8
+```text
+!`git status --short; git diff --stat; git diff --name-status; git log --oneline -8`
 ```
 
-When commands are listed together in one code block, run them together in one `bash` tool call to reduce overhead. Split them only if one command fails or extra inspection is needed.
+Use the injected snapshot to decide groups. Run additional git commands only when the snapshot is insufficient or needs refreshing.
 
 Then decide groups from those summaries. Use full diffs only when needed:
 
