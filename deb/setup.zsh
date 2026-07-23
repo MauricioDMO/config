@@ -64,10 +64,9 @@ as_user ln -sfn "$REPO_DIR/deb/ghostty/themes" "$TARGET_HOME/.config/ghostty/the
 as_user mkdir -p "$TARGET_HOME/.config/kitty"
 as_user ln -sfn "$REPO_DIR/deb/kitty/kitty.conf" "$TARGET_HOME/.config/kitty/kitty.conf"
 
-# Enlazar configuracion versionable de opencode sin tocar dependencias locales
-as_user mkdir -p "$TARGET_HOME/.config/opencode"
-as_user ln -sfn "$REPO_DIR/opencode/opencode.json" "$TARGET_HOME/.config/opencode/opencode.json"
-as_user ln -sfn "$REPO_DIR/opencode/commands" "$TARGET_HOME/.config/opencode/commands"
+# Enlazar la configuracion completa de opencode
+as_user mkdir -p "$TARGET_HOME/.config"
+as_user ln -sfnT "$REPO_DIR/opencode" "$TARGET_HOME/.config/opencode"
 
 # Enlazar configuraciones de X11 a la carpeta de configuración del sistema
 as_root mkdir -p /etc/X11/xorg.conf.d
