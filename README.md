@@ -28,6 +28,12 @@ El objetivo es mantener el entorno reproducible sin convertir el perfil de shell
 └── .gitignore
 ```
 
+Resumen de carpetas principales:
+
+- `deb/`: Configuración y scripts del entorno Debian/i3/Zsh, con módulos, enlaces de configuración, documentación local y fuentes Figlet.
+- `win/`: Módulos PowerShell que carga el bootstrap `win-main.ps1` de la raíz para utilidades, navegación, servicios, Node y otros comandos.
+- `opencode/`: Configuración y recursos de OpenCode; `opencode.json` configura el agente `plan`, MCP y plugins, mientras `agents/`, `commands/` y `skills/` contienen definiciones e instrucciones.
+
 ## Instalacion En Debian
 
 1. Clona o ubica el repo en `~/.config/config`.
@@ -79,7 +85,7 @@ cp .env.example .env
 
 `.env` no se versiona. Actualmente se usa para BitLocker y puede ampliarse para rutas o dispositivos locales.
 
-La configuracion de opencode vive en `opencode/` y se enlaza hacia `~/.config/opencode`. Solo se versionan archivos editables como `opencode.json` y `commands/`; dependencias locales como `node_modules`, `package.json` y lockfiles quedan fuera del repo.
+La configuracion de opencode vive en `opencode/`. `deb/setup.zsh` enlaza `opencode.json` y `commands/` hacia `~/.config/opencode`; `agents/` y `skills/` no se enlazan mediante ese script. Las dependencias locales como `node_modules`, `package.json`, `package-lock.json` y `bun.lock` quedan fuera del repo.
 
 Variables utiles para thermal-guard:
 
