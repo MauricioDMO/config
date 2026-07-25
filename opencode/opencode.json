@@ -27,6 +27,18 @@
         "--mcp"
       ],
       "enabled": true
+    },
+    "stock-images": {
+      "type": "local",
+      "command": [
+        "/home/mauriciodmo/stocky/.venv/bin/python",
+        "/home/mauriciodmo/stocky/stocky_mcp.py"
+      ],
+      "environment": {
+        "PEXELS_API_KEY": "{file:~/.secrets/pexels}",
+        "UNSPLASH_ACCESS_KEY": "{file:~/.secrets/unsplash}"
+      },
+      "enabled": true
     }
   },
   "plugin": [
