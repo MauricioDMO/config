@@ -3,7 +3,13 @@
 font-family = "Cascadia Code"
 font-feature = calt, liga, dlig, clig, ss01, ss02, ss03, ss04, ss05, ss06, ss07, ss08, ss09, ss10, ss11, ss12, ss13, ss14, ss15, ss16, ss17, ss18, ss19, ss20
 font-size = 10
+adjust-cursor-thickness = 200%
 term = xterm-256color
+
+# Mantener una sola instancia para que +new-window reutilice Ghostty.
+gtk-single-instance = true
+window-inherit-working-directory = true
+shell-integration = zsh
 
 # Usar el theme que acabas de crear (por nombre de archivo)
 theme = rofi-adi1090x
@@ -29,7 +35,7 @@ keybind = ctrl+shift+f=start_search
 keybind = performable:ctrl+c=copy_to_clipboard
 
 # Ctrl+V: pegar desde clipboard
-keybind = ctrl+v=paste_from_clipboard
+keybind = performable:ctrl+v=paste_from_clipboard
 
 # Ctrl+Backspace: borrar palabra hacia la izquierda (manda ESC DEL)
 keybind = ctrl+backspace=text:\x1b\x7f
@@ -39,6 +45,16 @@ keybind = ctrl+delete=esc:d
 
 keybind = ctrl+left=esc:b
 keybind = ctrl+right=esc:f
+
+# Envia Shift+flechas a zsh para seleccionar el comando en edicion.
+keybind = shift+arrow_left=text:\x1b[1;2D
+keybind = shift+arrow_right=text:\x1b[1;2C
+keybind = shift+arrow_up=text:\x1b[1;2A
+keybind = shift+arrow_down=text:\x1b[1;2B
+keybind = ctrl+shift+arrow_left=text:\x1b[1;6D
+keybind = ctrl+shift+arrow_right=text:\x1b[1;6C
+keybind = ctrl+shift+arrow_up=text:\x1b[1;6A
+keybind = ctrl+shift+arrow_down=text:\x1b[1;6B
 
 # Velocidad de scroll (default=1.0, aumentar para más rápido)
 mouse-scroll-multiplier = 5
