@@ -21,7 +21,7 @@ font pango:JetBrains Mono 10
 # ------------------------------------------------------------------------------
 # 2. APLICACIONES Y LANZADORES
 # ------------------------------------------------------------------------------
-# Terminal (Kitty)
+# Terminal (Ghostty)
 bindsym $mod+Return exec --no-startup-id ~/.config/i3/scripts/open-terminal-here.sh
 
 # Menú de aplicaciones (Rofi)
@@ -148,6 +148,10 @@ bindsym $mod+f fullscreen toggle
 
 # Flotante (Floating)
 bindsym $mod+Shift+space floating toggle
+# Mod + clic izquierdo y arrastre: mover ventanas flotantes
+floating_modifier $mod
+# Mod + clic central: alternar entre mosaico y flotante
+bindsym --whole-window $mod+button2 floating toggle
 
 # Tipos de Layout
 bindsym $mod+s layout stacking
@@ -246,10 +250,12 @@ bindsym $mod+Control+o move workspace to output next
 # ------------------------------------------------------------------------------
 # Forzar bordes para que se vea el foco
 
-# Kitty
-for_window [class="kitty"] border pixel 2
+# Ghostty
+for_window [class="com.mitchellh.ghostty"] border pixel 2
 # VS Code
 for_window [class="code"] border pixel 2
+# CopyQ: mostrar la ventana principal como flotante
+for_window [class="copyq" window_role="main"] floating enable
 
 # Quitar barra de título en modo split, pero mantenerla en tabbed/stacking
 # Nota: i3 no permite ocultar títulos basado puramente en el layout dinámico de forma nativa simple,
@@ -310,7 +316,7 @@ exec_always --no-startup-id sh -c '[ -x "$HOME/.screenlayout/dock.sh" ] && "$HOM
 
 # Fondo de pantalla aleatorio (si hay imágenes en ~/core/config/bg/)
 # Con delay solo en primer login
-exec_always --no-startup-id sh -c 'bg_dir="$HOME/core/config/bg"; [ -d "$bg_dir" ] || exit 0; if [ ! -f /tmp/i3-startup-bg ]; then sleep 1.5; touch /tmp/i3-startup-bg; fi; img=$(find "$bg_dir" -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
+exec_always --no-startup-id sh -c 'bg_dir="$HOME/core/config/bg"; [ -d "$bg_dir" ] || exit 0; if [ ! -f /tmp/i3-startup-bg ]; then sleep 1.5; touch /tmp/i3-startup-bg; fi; img=$(find "$bg_dir" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n 1); [ -n "$img" ] && feh --bg-fill "$img"'
 
 # Configuración de periféricos (scroll natural solo para Touchpad)
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || true'
@@ -318,5 +324,5 @@ exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchp
 exec_always --no-startup-id sh -c 'xinput set-prop "VEN_27C6:00 27C6:0D43 Touchpad" "libinput Scroll Method Enabled" 1 0 0 2>/dev/null || true'
 exec_always --no-startup-id sh -c 'xinput set-prop "PS/2 Generic Mouse" "libinput Natural Scrolling Enabled" 0 2>/dev/null || true'
 
-# Forzar layouts y atajo de cambio de idioma con Mod+Espacio.
-exec_always --no-startup-id setxkbmap -layout "us,latam" -option "grp:win_space_toggle"
+# Iniciar en US; el binding de i3 alterna entre US y Latam.
+exec_always --no-startup-id setxkbmap -option "" -layout "us"

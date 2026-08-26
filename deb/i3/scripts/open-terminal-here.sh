@@ -1,26 +1,28 @@
 #!/bin/sh
 
-KITTY=/home/mauriciodmo/.local/bin/kitty
-KITTEN=/home/mauriciodmo/.local/bin/kitten
-KITTY_SOCKET=unix:/tmp/kitty-mauriciodmo
+GHOSTTY=/usr/bin/ghostty
+SHELL_COMMAND="${SHELL:-/bin/zsh}"
 
 focused_class="$(i3-msg -t get_tree | jq -r 'first(.. | objects | select(.focused? == true) | (.window_properties.class // .app_id // empty)) // ""')"
 
 case "$focused_class" in
-  kitty|Kitty)
-    "$KITTEN" @ --to "$KITTY_SOCKET" launch \
-      --type=os-window \
-      --cwd=current \
-      --source-window state:focused \
-      --env CONFIG_HIDE_BANNER=1 \
-      --no-response >/dev/null 2>&1 && exit 0
+  com.mitchellh.ghostty|ghostty|Ghostty)
+    # Avoid +new-window's cwd override so Ghostty can inherit the focused PWD.
+    gdbus call \
+      --session \
+      --dest com.mitchellh.ghostty \
+      --object-path /com/mitchellh/ghostty \
+      --method org.gtk.Actions.Activate \
+      new-window-command \
+      "[<@as [\"-e\", \"env\", \"CONFIG_HIDE_BANNER=1\", \"$SHELL_COMMAND\"]>]" \
+      "[]" \
+      >/dev/null 2>&1 && exit 0
     ;;
 esac
 
-"$KITTEN" @ --to "$KITTY_SOCKET" launch \
-  --type=os-window \
-  --cwd "$HOME" \
-  --env CONFIG_HIDE_BANNER= \
-  --no-response >/dev/null 2>&1 && exit 0
+"$GHOSTTY" +new-window \
+  --working-directory=home \
+  --command="env CONFIG_HIDE_BANNER= $SHELL_COMMAND" \
+  >/dev/null 2>&1 && exit 0
 
-exec "$KITTY" --listen-on "$KITTY_SOCKET"
+exec env CONFIG_HIDE_BANNER= "$GHOSTTY" --working-directory="$HOME"

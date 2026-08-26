@@ -1,3 +1,10 @@
 #!/bin/sh
-setxkbmap -layout "us,latam" -option "grp:win_space_toggle" && \
-	xdotool key --clearmodifiers ISO_Next_Group
+current=$(setxkbmap -query | sed -n 's/^layout:[[:space:]]*//p')
+
+case "$current" in
+    us) next=latam ;;
+    latam) next=us ;;
+    *) next=us ;;
+esac
+
+setxkbmap -option "" -layout "$next"
