@@ -9,6 +9,11 @@ DEB_CONFIG_DIR="${0:a:h}"
 ENV_FILE="$DEB_CONFIG_DIR/../.env"
 [[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
 
+# Los terminales iniciados desde el escritorio pueden omitir /usr/games.
+if [[ ":$PATH:" != *:/usr/games:* ]]; then
+  export PATH="$PATH:/usr/games"
+fi
+
 # ========================================
 # ZSH / OMZ Setup
 # ========================================
@@ -100,6 +105,123 @@ bindkey '^[d' kill-word
 
 autoload -Uz select-word-style
 select-word-style bash
+
+# Selecciona el comando que se esta editando; no el scrollback de Ghostty.
+_zle_select_move() {
+  if [[ $LASTWIDGET != select-* ]]; then
+    MARK=$CURSOR
+    REGION_ACTIVE=1
+  fi
+  zle ".$1"
+}
+
+_zle_select_left() { _zle_select_move backward-char; }
+_zle_select_right() { _zle_select_move forward-char; }
+_zle_select_up() { _zle_select_move up-line; }
+_zle_select_down() { _zle_select_move down-line; }
+_zle_select_word_left() { _zle_select_move backward-word; }
+_zle_select_word_right() { _zle_select_move forward-word; }
+
+zle -N select-left _zle_select_left
+zle -N select-right _zle_select_right
+zle -N select-up _zle_select_up
+zle -N select-down _zle_select_down
+zle -N select-word-left _zle_select_word_left
+zle -N select-word-right _zle_select_word_right
+
+_zle_move() {
+  REGION_ACTIVE=0
+  zle ".$1"
+}
+
+_zle_move_left() { _zle_move backward-char; }
+_zle_move_right() {
+  REGION_ACTIVE=0
+  if (( $+widgets[autosuggest-accept] )); then
+    zle autosuggest-accept
+  else
+    zle .forward-char
+  fi
+}
+_zle_move_up() {
+  REGION_ACTIVE=0
+  if (( $+widgets[history-substring-search-up] )); then
+    zle history-substring-search-up
+  elif (( $+widgets[up-line-or-beginning-search] )); then
+    zle up-line-or-beginning-search
+  else
+    zle .up-line-or-history
+  fi
+}
+_zle_move_down() {
+  REGION_ACTIVE=0
+  if (( $+widgets[history-substring-search-down] )); then
+    zle history-substring-search-down
+  elif (( $+widgets[down-line-or-beginning-search] )); then
+    zle down-line-or-beginning-search
+  else
+    zle .down-line-or-history
+  fi
+}
+_zle_move_word_left() { _zle_move backward-word; }
+_zle_move_word_right() { _zle_move forward-word; }
+
+zle -N move-left _zle_move_left
+zle -N move-right _zle_move_right
+zle -N move-up _zle_move_up
+zle -N move-down _zle_move_down
+zle -N move-word-left _zle_move_word_left
+zle -N move-word-right _zle_move_word_right
+
+_zle_delete_or() {
+  if (( REGION_ACTIVE && MARK != CURSOR )); then
+    zle .kill-region
+    REGION_ACTIVE=0
+  else
+    REGION_ACTIVE=0
+    zle ".$1"
+  fi
+}
+
+_zle_backspace() { _zle_delete_or backward-delete-char; }
+_zle_delete() { _zle_delete_or delete-char; }
+_zle_backspace_word() { _zle_delete_or backward-kill-word; }
+_zle_delete_word() { _zle_delete_or kill-word; }
+
+zle -N delete-backward _zle_backspace
+zle -N delete-forward _zle_delete
+zle -N delete-word-backward _zle_backspace_word
+zle -N delete-word-forward _zle_delete_word
+
+bindkey '^[[1;2D' select-left
+bindkey '^[[1;2C' select-right
+bindkey '^[[1;2A' select-up
+bindkey '^[[1;2B' select-down
+bindkey '^[[1;6D' select-word-left
+bindkey '^[[1;6C' select-word-right
+bindkey '^[[1;6A' select-up
+bindkey '^[[1;6B' select-down
+
+bindkey "$terminfo[kcub1]" move-left
+bindkey "$terminfo[kcuf1]" move-right
+bindkey "$terminfo[kcuu1]" move-up
+bindkey "$terminfo[kcud1]" move-down
+bindkey '^[[D' move-left
+bindkey '^[[C' move-right
+bindkey '^[[A' move-up
+bindkey '^[[B' move-down
+bindkey '^[b' move-word-left
+bindkey '^[f' move-word-right
+bindkey '^[[1;5D' move-word-left
+bindkey '^[[1;5C' move-word-right
+bindkey '^[[1;5A' move-up
+bindkey '^[[1;5B' move-down
+bindkey '^?' delete-backward
+bindkey '^H' delete-backward
+bindkey '^[[3~' delete-forward
+bindkey '^[^?' delete-word-backward
+bindkey '^[[3;5~' delete-word-forward
+bindkey '^[d' delete-word-forward
 
 # Profile
 [[ -f ~/.zprofile ]] && source ~/.zprofile
