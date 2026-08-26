@@ -165,9 +165,8 @@ para abrir shells sin banner cuando corresponde.
 
 Al migrar a otro equipo hay que revisar especialmente `$HOME/core`, el nombre
 de los dispositivos de la tableta, la dirección Bluetooth usada por `buds` y
-las rutas absolutas del lanzador de Kitty en `deb/i3/scripts`. Si el checkout no
-está en `~/.config/config`, revisa también la ruta fija al tema de Rofi en
-`deb/i3/config`.
+la disponibilidad de Ghostty. Si el checkout no está en `~/.config/config`,
+revisa también la ruta fija al tema de Rofi en `deb/i3/config`.
 
 ## Enlaces que crea `setup.zsh`
 
@@ -187,7 +186,7 @@ Estos enlaces se crean para `TARGET_USER`:
 | `~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml` | `REPO_DIR/deb/xfce4/xfce4-power-manager.xml` |
 | `~/.p10k.zsh` | `REPO_DIR/deb/terminal/.p10k.zsh` |
 | `~/.config/ghostty/config` | `REPO_DIR/deb/ghostty/config` |
-| `~/.config/ghostty/themes` | `REPO_DIR/deb/ghostty/themes` (el origen no existe actualmente; el enlace queda roto) |
+| `~/.config/ghostty/themes` | `REPO_DIR/deb/ghostty/themes` |
 | `~/.config/kitty/kitty.conf` | `REPO_DIR/deb/kitty/kitty.conf` |
 | `~/.config/opencode` | `REPO_DIR/opencode` |
 
@@ -195,11 +194,6 @@ Los directorios padre de i3, i3blocks, XFCE, Ghostty, Kitty y
 `~/.config` se crean cuando el script los necesita. La tabla incluye el enlace
 de OpenCode porque el instalador lo crea, pero esa configuración queda fuera de
 esta guía.
-
-**Advertencia sobre Ghostty:** en el estado actual no existe
-`deb/ghostty/themes`, aunque `setup.zsh` intenta enlazarlo y `config` selecciona
-el tema `rofi-adi1090x`. Proporciona ese tema por separado o no consideres
-válido ese enlace; esta guía no afirma que el instalador lo suministre.
 
 ### Enlaces del sistema (root)
 
@@ -249,7 +243,7 @@ sistema. No hay una opción observada para omitir solo esa parte.
 
 ### i3 e i3blocks
 
-`deb/i3/config` define i3 con Mod4 como tecla principal, lanzadores para Kitty,
+`deb/i3/config` define i3 con Mod4 como tecla principal, lanzadores para Ghostty,
 Rofi, Brave, VS Code, Obsidian y Dolphin, controles multimedia y de brillo,
 atajos de trackpad, capturas, teclado US/Latam, navegación Vim de ventanas,
 workspaces 1–6, multi-monitor y autostart de servicios del escritorio.
@@ -278,10 +272,10 @@ portapapeles; y el resto muestra estado.
 
 ### Terminales, prompt y Rofi
 
-- Kitty usa Cascadia Code, opacidad `0.92`, control remoto por socket y atajos
-  para tamaño de fuente, scrollback, copiar/pegar y borrar palabras.
 - Ghostty usa Cascadia Code, el tema `rofi-adi1090x`, opacidad `0.92`, desenfoque
   y atajos equivalentes para búsqueda, portapapeles y navegación por palabras.
+- Kitty conserva su configuración opcional en `deb/kitty/kitty.conf`, pero ya no
+  es el terminal predeterminado de los lanzadores del repositorio.
 - `.p10k.zsh` configura Powerlevel10k con prompt de dos líneas, icono del
   sistema, directorio, estado Git, estado del último comando y otros segmentos
   opcionales.
@@ -308,6 +302,7 @@ for file in deb/i3blocks/scripts/*.sh deb/thermal/thermal-guard.sh; do
   bash -n "$file" || exit 1
 done
 i3 -C -c deb/i3/config
+ghostty +validate-config
 ```
 
 Si está disponible `shellcheck`, puede usarse como comprobación adicional sobre
