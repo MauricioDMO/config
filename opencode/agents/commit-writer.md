@@ -1,7 +1,7 @@
 ---
 description: Creates clean Conventional Commits from current Git changes.
 mode: subagent
-model: minimax-coding-plan/MiniMax-M2.7
+model: openai/gpt-5.6-luna
 color: "#FF0000"
 permission:
   edit: deny
