@@ -59,6 +59,9 @@ if [[ -f "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions/zsh
   # color de sugerencia (gris)
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 
+  # Mantener la sugerencia al envolver el widget personalizado de la flecha.
+  ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(move-right)
+
   # Aceptar sugerencia con → (Right Arrow) y/o Ctrl+F
   bindkey '^[[C' autosuggest-accept
   bindkey '^F' autosuggest-accept
@@ -137,7 +140,7 @@ _zle_move() {
 _zle_move_left() { _zle_move backward-char; }
 _zle_move_right() {
   REGION_ACTIVE=0
-  if (( $+widgets[autosuggest-accept] )); then
+  if [[ -n "$POSTDISPLAY" ]] && (( $+widgets[autosuggest-accept] )); then
     zle autosuggest-accept
   else
     zle .forward-char
