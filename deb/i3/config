@@ -15,6 +15,10 @@
 # Tecla maestra (Mod4 = Tecla Windows/Super)
 set $mod Mod4
 
+# Workspace dedicado para YouTube Music
+set $wsMusic "M"
+set $notMusic [con_id="__focused__" workspace="^(?!M$).*"]
+
 # Fuente del sistema para ventanas y barra
 font pango:JetBrains Mono 10
 
@@ -38,6 +42,10 @@ bindsym $mod+c exec code
 
 # Notas (Obsidian)
 bindsym $mod+q exec --no-startup-id obsidian
+
+# YouTube Music
+bindsym $mod+m exec --no-startup-id ~/.config/i3/scripts/open-music.sh
+assign [class="^com[.]github[.]th-ch[.]youtube-music$"] workspace $wsMusic
 
 # Administrador de archivos (Dolphin)
 bindsym $mod+x exec --no-startup-id dolphin
@@ -77,9 +85,10 @@ bindsym XF86AudioMute exec --no-startup-id sh -c 'pactl set-sink-mute @DEFAULT_S
 bindsym $mod+Ctrl+v exec pavucontrol
 
 # --- Control Multimedia (Playerctl) ---
-bindsym XF86AudioPlay exec playerctl play-pause
-bindsym XF86AudioNext exec playerctl next
-bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86AudioPlay exec --no-startup-id playerctl --player=playerctld play-pause
+bindsym XF86AudioPause exec --no-startup-id playerctl --player=playerctld play-pause
+bindsym XF86AudioNext exec --no-startup-id playerctl --player=playerctld next
+bindsym XF86AudioPrev exec --no-startup-id playerctl --player=playerctld previous
 
 # --- Brillo de Pantalla ---
 bindsym XF86MonBrightnessUp exec brightnessctl set +5%
@@ -125,16 +134,16 @@ bindsym $mod+Right focus right
 # 6. MOVIMIENTO DE VENTANAS
 # ------------------------------------------------------------------------------
 # Mover ventana activa con Shift + hjkl
-bindsym $mod+Shift+h move left
-bindsym $mod+Shift+j move down
-bindsym $mod+Shift+k move up
-bindsym $mod+Shift+l move right
+bindsym $mod+Shift+h $notMusic move left
+bindsym $mod+Shift+j $notMusic move down
+bindsym $mod+Shift+k $notMusic move up
+bindsym $mod+Shift+l $notMusic move right
 
 # Mover ventana activa con Shift + Flechas
-bindsym $mod+Shift+Left move left
-bindsym $mod+Shift+Down move down
-bindsym $mod+Shift+Up move up
-bindsym $mod+Shift+Right move right
+bindsym $mod+Shift+Left $notMusic move left
+bindsym $mod+Shift+Down $notMusic move down
+bindsym $mod+Shift+Up $notMusic move up
+bindsym $mod+Shift+Right $notMusic move right
 
 # ------------------------------------------------------------------------------
 # 7. DISEÑO Y MODIFICACIÓN DEL LAYOUT
@@ -198,40 +207,40 @@ bindcode $mod+84 workspace $ws5
 bindcode $mod+85 workspace $ws6
 
 # Mover ventana al workspace (Mod + Shift + Número)
-bindsym $mod+Shift+1 move container to workspace $ws1
-bindsym $mod+Shift+2 move container to workspace $ws2
-bindsym $mod+Shift+3 move container to workspace $ws3
-bindsym $mod+Shift+4 move container to workspace $ws4
-bindsym $mod+Shift+5 move container to workspace $ws5
-bindsym $mod+Shift+6 move container to workspace $ws6
+bindsym $mod+Shift+1 $notMusic move container to workspace $ws1
+bindsym $mod+Shift+2 $notMusic move container to workspace $ws2
+bindsym $mod+Shift+3 $notMusic move container to workspace $ws3
+bindsym $mod+Shift+4 $notMusic move container to workspace $ws4
+bindsym $mod+Shift+5 $notMusic move container to workspace $ws5
+bindsym $mod+Shift+6 $notMusic move container to workspace $ws6
 
 # Mover ventana al workspace con numpad
-bindcode $mod+Shift+87 move container to workspace $ws1
-bindcode $mod+Shift+88 move container to workspace $ws2
-bindcode $mod+Shift+89 move container to workspace $ws3
-bindcode $mod+Shift+83 move container to workspace $ws4
-bindcode $mod+Shift+84 move container to workspace $ws5
-bindcode $mod+Shift+85 move container to workspace $ws6
+bindcode $mod+Shift+87 $notMusic move container to workspace $ws1
+bindcode $mod+Shift+88 $notMusic move container to workspace $ws2
+bindcode $mod+Shift+89 $notMusic move container to workspace $ws3
+bindcode $mod+Shift+83 $notMusic move container to workspace $ws4
+bindcode $mod+Shift+84 $notMusic move container to workspace $ws5
+bindcode $mod+Shift+85 $notMusic move container to workspace $ws6
 
 # Mover el workspace actual completo a otro número (Renombrar)
-bindsym $mod+Ctrl+1 rename workspace to $ws1
-bindsym $mod+Ctrl+2 rename workspace to $ws2
-bindsym $mod+Ctrl+3 rename workspace to $ws3
-bindsym $mod+Ctrl+4 rename workspace to $ws4
-bindsym $mod+Ctrl+5 rename workspace to $ws5
-bindsym $mod+Ctrl+6 rename workspace to $ws6
+bindsym $mod+Ctrl+1 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws1
+bindsym $mod+Ctrl+2 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws2
+bindsym $mod+Ctrl+3 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws3
+bindsym $mod+Ctrl+4 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws4
+bindsym $mod+Ctrl+5 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws5
+bindsym $mod+Ctrl+6 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws6
 
 # Renombrar workspace con numpad
-bindcode $mod+Ctrl+87 rename workspace to $ws1
-bindcode $mod+Ctrl+88 rename workspace to $ws2
-bindcode $mod+Ctrl+89 rename workspace to $ws3
-bindcode $mod+Ctrl+83 rename workspace to $ws4
-bindcode $mod+Ctrl+84 rename workspace to $ws5
-bindcode $mod+Ctrl+85 rename workspace to $ws6
+bindcode $mod+Ctrl+87 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws1
+bindcode $mod+Ctrl+88 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws2
+bindcode $mod+Ctrl+89 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws3
+bindcode $mod+Ctrl+83 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws4
+bindcode $mod+Ctrl+84 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws5
+bindcode $mod+Ctrl+85 exec --no-startup-id ~/.config/i3/scripts/rename-workspace.sh $ws6
 
 # Alternar entre workspace actual y el anterior
 bindsym $mod+Tab workspace back_and_forth
-bindsym $mod+Shift+Tab move container to workspace back_and_forth
+bindsym $mod+Shift+Tab $notMusic move container to workspace back_and_forth
 
 # ------------------------------------------------------------------------------
 # 9. GESTIÓN MULTI-MONITOR
@@ -240,7 +249,7 @@ bindsym $mod+Shift+Tab move container to workspace back_and_forth
 bindsym $mod+o focus output next
 
 # Mover ventana a la siguiente pantalla
-bindsym $mod+Shift+o move container to output next
+bindsym $mod+Shift+o $notMusic move container to output next
 
 # Mover workspace completo a la siguiente pantalla
 bindsym $mod+Control+o move workspace to output next
@@ -303,6 +312,7 @@ exec --no-startup-id nm-applet
 exec --no-startup-id dunst
 exec --no-startup-id picom
 exec --no-startup-id lxpolkit
+exec --no-startup-id playerctld daemon
 
 # Bloqueo de pantalla automático
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 111111

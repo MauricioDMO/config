@@ -41,6 +41,9 @@ as_user ln -sfn "$REPO_DIR/deb/i3/config" "$TARGET_HOME/.config/i3/config"
 as_user ln -sfn "$REPO_DIR/deb/i3/scripts" "$TARGET_HOME/.config/i3/scripts"
 chmod +x "$REPO_DIR"/deb/i3/scripts/*.sh
 
+# Evitar que BlueZ intercepte AVRCP antes de los bindings multimedia de i3.
+as_user systemctl --user mask --now mpris-proxy.service
+
 # Migracion a i3blocks
 # ln -sfn ~/.config/config/deb/i3status/config ~/.config/i3status/config
 as_user mkdir -p "$TARGET_HOME/.config/i3blocks"

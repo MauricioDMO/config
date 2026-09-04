@@ -95,8 +95,9 @@ Después, ejecuta el instalador:
 
 `setup.zsh` es un instalador de enlaces, no el bootstrap de Zsh. Usa la ruta de
 su propio archivo para localizar la raíz del repositorio, crea directorios de
-destino cuando corresponde y aplica `ln -sfn`/`ln -sfnT`. También marca como
-ejecutables los scripts de i3, i3blocks y Thermal Guard.
+destino cuando corresponde y aplica `ln -sfn`/`ln -sfnT`. También enmascara
+`mpris-proxy.service` para que BlueZ no intercepte los controles multimedia de
+i3, y marca como ejecutables los scripts de i3, i3blocks y Thermal Guard.
 
 La ejecución termina con error en el primer fallo (`set -e`). No hay una fase de
 rollback: si falla un paso posterior, los enlaces anteriores pueden haber sido
