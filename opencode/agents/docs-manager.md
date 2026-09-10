@@ -5,6 +5,7 @@ model: openai/gpt-5.6-luna
 variant: high
 temperature: 0.1
 steps: 24
+hidden: true
 color: primary
 permission:
   read: allow

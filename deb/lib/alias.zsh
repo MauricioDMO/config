@@ -17,6 +17,7 @@ alias audio='pavucontrol'
 
 # --- Opencode ---
 alias o='opencode'
+alias commit-all="o run --command 'commit'"
 
 # --- Android ---
 phone() {
