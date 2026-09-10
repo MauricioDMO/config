@@ -12,6 +12,7 @@ alias wifi='nmcli device wifi'
 
 # --- Bluetooth / Audio ---
 alias buds='bluetoothctl connect D0:56:FB:81:EF:4E'
+alias sony='bluetoothctl connect AC:80:0A:F0:D4:E0'
 alias audio='pavucontrol'
 
 # --- Opencode ---

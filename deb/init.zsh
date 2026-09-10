@@ -62,6 +62,9 @@ if [[ -f "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions/zsh
   # Mantener la sugerencia al envolver el widget personalizado de la flecha.
   ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(move-right)
 
+  # Ctrl+Right acepta solo la siguiente palabra de la sugerencia.
+  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(move-word-right)
+
   # Aceptar sugerencia con → (Right Arrow) y/o Ctrl+F
   bindkey '^[[C' autosuggest-accept
   bindkey '^F' autosuggest-accept
