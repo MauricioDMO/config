@@ -71,6 +71,19 @@ as_user ln -sfn "$REPO_DIR/deb/kitty/kitty.conf" "$TARGET_HOME/.config/kitty/kit
 as_user mkdir -p "$TARGET_HOME/.config"
 as_user ln -sfnT "$REPO_DIR/opencode" "$TARGET_HOME/.config/opencode"
 
+# Enlazar las skills y su lockfile al contenido versionado del repositorio.
+as_user mkdir -p "$TARGET_HOME/.agents"
+if [ -e "$TARGET_HOME/.agents/skills" ] && [ ! -L "$TARGET_HOME/.agents/skills" ]; then
+  echo "No se reemplaza el directorio existente: $TARGET_HOME/.agents/skills" >&2
+  exit 1
+fi
+if [ -e "$TARGET_HOME/.agents/.skill-lock.json" ] && [ ! -L "$TARGET_HOME/.agents/.skill-lock.json" ]; then
+  echo "No se reemplaza el archivo existente: $TARGET_HOME/.agents/.skill-lock.json" >&2
+  exit 1
+fi
+as_user ln -sfnT "$REPO_DIR/opencode/skills" "$TARGET_HOME/.agents/skills"
+as_user ln -sfn "$REPO_DIR/opencode/.skill-lock.json" "$TARGET_HOME/.agents/.skill-lock.json"
+
 # Enlazar configuraciones de X11 a la carpeta de configuración del sistema
 as_root mkdir -p /etc/X11/xorg.conf.d
 as_root ln -sfn "$REPO_DIR/deb/X11/70-synaptics.conf" /etc/X11/xorg.conf.d/70-synaptics.conf

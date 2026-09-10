@@ -12,6 +12,7 @@ se instala en el entorno del usuario y qué debe revisarse al mantenerla.
 - `opencode/agents/`: definiciones de agentes.
 - `opencode/commands/`: comandos disponibles.
 - `opencode/skills/`: instrucciones reutilizables agrupadas por skill.
+- `opencode/.skill-lock.json`: procedencia y hash de las skills externas.
 
 `deb/setup.zsh` resuelve la ubicación del repositorio a partir de la ruta del
 script, determina el usuario objetivo (`SUDO_USER` o `USER`) y crea, si hace
@@ -19,12 +20,15 @@ falta, `~/.config`. Después ejecuta:
 
 ```sh
 ln -sfnT "$REPO_DIR/opencode" "$TARGET_HOME/.config/opencode"
+ln -sfnT "$REPO_DIR/opencode/skills" "$TARGET_HOME/.agents/skills"
+ln -sfn "$REPO_DIR/opencode/.skill-lock.json" "$TARGET_HOME/.agents/.skill-lock.json"
 ```
 
 La operación se realiza con el usuario objetivo mediante `as_user`. Por tanto,
-`~/.config/opencode` apunta a la carpeta `opencode/` del repositorio; no se
-copia una segunda configuración. Para volver a aplicar el enlace, ejecuta
-`deb/setup.zsh` desde el repositorio.
+`~/.config/opencode` y `~/.agents/skills` apuntan al contenido del repositorio;
+no se mantienen copias separadas. El lockfile global también apunta a la copia
+versionada. Para volver a aplicar los enlaces, ejecuta `deb/setup.zsh` desde el
+repositorio.
 
 ## Configuración principal
 
@@ -75,8 +79,8 @@ archivos son:
   agente y unas instrucciones. Los nombres actuales son `commit` y
   `document`.
 - **Skills:** son conjuntos de instrucciones especializadas que un agente puede
-  cargar para una tarea. Los nombres actuales son `docs-document`,
-  `web-perf`, `docs-discovery`, `docs-orchestration` y `docs-review-fix`.
+  cargar para una tarea. Las skills locales y externas se mantienen juntas bajo
+  `opencode/skills/`; las externas se identifican en `opencode/.skill-lock.json`.
 
 `opencode/AGENTS.md` contiene instrucciones operativas para los agentes, como
 reglas para consultar CodeGraph y recuperar documentación con `ctx7`. No es
@@ -90,6 +94,12 @@ reinicia la sesión de OpenCode después de cambiar `opencode.json`, agentes,
 comandos o skills para asegurarte de que la nueva versión se utiliza.
 
 ## Dependencias locales y versionado
+
+Las skills instaladas originalmente en `~/.agents/skills` se incorporan al
+repositorio bajo `opencode/skills/`. `~/.agents/skills` es solo un symlink hacia
+esa carpeta, por lo que sus cambios quedan disponibles para el cargador global
+y pueden revisarse/versionarse con Git. El lockfile correspondiente sigue el
+mismo patrón en `~/.agents/.skill-lock.json`.
 
 En esta copia de trabajo existen físicamente `node_modules/`, `package.json` y
 `package-lock.json`, pero no forman parte del contenido versionado de
