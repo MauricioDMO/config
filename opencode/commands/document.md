@@ -1,13 +1,15 @@
 ---
-description: Discovers, creates or updates, and independently reviews documentation using current code as the source of truth
+description: Creates or updates documentation and independently reviews it against the current code
 agent: docs-manager
 subtask: false
 ---
 
-Run the complete documentation workflow for this request:
+Run the documentation workflow for this request:
 
 $ARGUMENTS
 
-Use the current codebase as the source of truth. Run one documentation discovery pass, divide the work into small independent units, delegate documentation changes, and submit every unit to a corrective review performed by a fresh `docs-worker` instance.
+Use the current codebase as the source of truth. Skip discovery only when the request names both the documentation files and the related code scope. Otherwise delegate one focused discovery pass to `docs-explorer`.
 
-Do not stop after proposing a plan. Complete the documentation changes and return the final summary. If no arguments were provided, ask only for the documentation scope to work on.
+Split the work into non-overlapping units, delegate writing to fresh `docs-writer` instances, and delegate a corrective review of every completed unit to fresh `docs-reviewer` instances. Run independent units in parallel, never edit documentation yourself, and finish the changes rather than returning only a plan.
+
+If no arguments were provided, ask only for the documentation scope to work on.

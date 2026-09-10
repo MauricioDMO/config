@@ -74,13 +74,20 @@ archivos son:
 
 - **Agentes:** definen perfiles de trabajo, permisos y, en algunos casos,
   instrucciones de rol. Los nombres actuales son `brainstorm`, `docs-manager`,
-  `commit-writer`, `docs-explorer` y `docs-worker`.
+  `commit-writer`, `docs-explorer`, `docs-writer` y `docs-reviewer`.
 - **Comandos:** son entradas invocables que asocian una descripción con un
   agente y unas instrucciones. Los nombres actuales son `commit` y
   `document`.
 - **Skills:** son conjuntos de instrucciones especializadas que un agente puede
   cargar para una tarea. Las skills locales y externas se mantienen juntas bajo
   `opencode/skills/`; las externas se identifican en `opencode/.skill-lock.json`.
+
+El comando `/document` usa `docs-manager` como orquestador. El descubrimiento es
+condicional y, cuando hace falta, lo realiza `docs-explorer`; la escritura y la
+revisión correctiva están separadas entre `docs-writer` y `docs-reviewer`.
+Estos agentes contienen sus instrucciones directamente y no dependen de skills
+wrapper `docs-*`, para evitar cargas redundantes y mantener permisos distintos
+entre escritura y revisión.
 
 `opencode/AGENTS.md` contiene instrucciones operativas para los agentes, como
 reglas para consultar CodeGraph y recuperar documentación con `ctx7`. No es
