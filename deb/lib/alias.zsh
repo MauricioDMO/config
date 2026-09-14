@@ -4,6 +4,7 @@
 
 # --- Sistema ---
 alias cp="rsync -ah --info=progress2"
+alias clip='xclip -selection clipboard'
 alias shutdown='systemctl poweroff'
 alias reboot='systemctl reboot'
 
